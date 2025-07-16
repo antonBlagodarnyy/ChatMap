@@ -8,47 +8,34 @@ import {
   Validators,
 } from '@angular/forms';
 import { AuthService } from '../../../Services/auth.service';
+import { Router } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule],
-
-  template: `
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <mat-form-field>
-        <mat-label>Username</mat-label>
-        <input matInput formControlName="username" type="text" />
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>Password</mat-label>
-        <input matInput formControlName="password" type="password" />
-      </mat-form-field>
-      <button matButton type="submit"></button>
-    </form>
-  `,
-
-  styles: `form{
-    display:flex;
-    flex-direction:column;
-  }`,
+  imports: [ReactiveFormsModule, MatButtonModule,MatFormFieldModule, MatInputModule],
+  templateUrl: './login.component.html',
+  styleUrl: './../auth.styles.css',
 })
 export class LoginComponent {
-  constructor(private authService: AuthService) {}
-
-  form = new FormGroup({
-    username: new FormControl('', [ Validators.required]),
-    password: new FormControl('', [
-      Validators.minLength(6),
-      Validators.required,
-    ]),
+  constructor(private authService: AuthService, private router: Router) {}
+  loginForm = new FormGroup({
+    username: new FormControl('', [Validators.required,]),
+    password: new FormControl('', Validators.required),
   });
+  ngOnInit(): void {
+    this.authService.autoAuthUser();
 
+    if (this.authService.user.getValue()) {
+      this.router.navigate(['dashboard']);
+    }
+  }
   onSubmit() {
-    const username = this.form.get('username')?.value;
-    const password = this.form.get('password')?.value;
-
-    if (this.form.valid) {
-      if (username && password) this.authService.login(username, password);
+    if (!this.loginForm.invalid) {
+      const form = this.loginForm.value;
+      if (form.username != null && form.password != null) {
+        this.authService.login(form.username, form.password);
+      }
     }
   }
 }

@@ -29,7 +29,6 @@ import com.example.ChatMap.Utils.JwtUtil;
 
 @Controller // This means that this class is a Controller
 @RequestMapping(path = "/users") // This means URL's start with /demo (after Application path)
-@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 public class UserController {
 
@@ -96,6 +95,10 @@ public class UserController {
 	@GetMapping("/csrf/token")
 	public CsrfToken csrf(CsrfToken token) {
 		return token;
+	}
+	@GetMapping("/hellow")
+	public @ResponseBody ResponseEntity<Map<String, String>> hellow() {
+		return ResponseEntity.ok(Map.of("message","hellow"));
 	}
 
 }

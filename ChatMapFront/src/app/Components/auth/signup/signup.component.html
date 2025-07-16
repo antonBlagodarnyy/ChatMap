@@ -1,1 +1,36 @@
-<p>signup works!</p>
+<div class="container">
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <mat-form-field>
+      <mat-label>User name:</mat-label>
+      <input matInput id="userName" type="text" formControlName="userName" />
+        <mat-error>User name is required.</mat-error>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Email:</mat-label>
+      <input matInput id="email" type="text" formControlName="email" />
+
+      <mat-error> This must be a valid email. </mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Password:</mat-label>
+      <input
+        matInput
+        id="password"
+        type="password"
+        formControlName="password"
+      />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Confirm password:</mat-label>
+      <input
+        matInput
+        id="passwordConfirm"
+        type="password"
+        formControlName="passwordConfirm"
+      />
+      <mat-error> Passwords must match.</mat-error>
+    </mat-form-field>
+    <button mat-raised-button type="submit">Registrar</button>
+  </form>
+</div>

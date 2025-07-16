@@ -1,5 +1,6 @@
 package com.example.ChatMap.Repositories;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import com.example.ChatMap.Entities.User;
@@ -9,5 +10,7 @@ import com.example.ChatMap.Entities.User;
 
 public interface UserRepository extends CrudRepository<User, Integer> {
 	User findByUsername(String username);
+	
+	@Query("SELECT u.id FROM User u WHERE u.username = :username")
 	Integer findIdByUsername(String username);
 }

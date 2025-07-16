@@ -1,55 +1,60 @@
+import { NgIf } from '@angular/common';
 import { Component } from '@angular/core';
+import { passwordMatch } from './ValidationFunctions';
 import {
   FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '../../../Services/auth.service';
+import { Router } from '@angular/router';
+import { MatError, MatInputModule, MatLabel } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-signup',
-  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule],
-  template: ` <form [formGroup]="form" (ngSubmit)="onSubmit()">
-  <mat-form-field>
-      <mat-label>Username</mat-label>
-      <input matInput formControlName="username" type="text" />
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>Email</mat-label>
-      <input matInput formControlName="email" type="email" />
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>Password</mat-label>
-      <input matInput formControlName="password" type="password" />
-    </mat-form-field>
-    <button matButton type="submit"></button>
-  </form>`,
-  styles: `form{
-    display:flex;
-    flex-direction:column;
-  }`,
+  imports: [
+    ReactiveFormsModule,
+    MatInputModule,
+    MatLabel,
+    MatButtonModule,
+    MatError,
+  ],
+  templateUrl: './signup.component.html',
+  styleUrl: '../auth.styles.css',
 })
 export class SignupComponent {
-  constructor(private authService: AuthService) {}
-  form = new FormGroup({
-    username: new FormControl('', Validators.required),
-    email: new FormControl('', [Validators.email, Validators.required]),
-    password: new FormControl('', [
-      Validators.minLength(6),
-      Validators.required,
-    ]),
-  });
-  onSubmit() {
-    const username = this.form.get('username')?.value;
-    const email = this.form.get('email')?.value;
-    const password = this.form.get('password')?.value;
+  constructor(private authService: AuthService, private router: Router) {}
 
-    if (this.form.valid) {
-      if (email && password && username)
-        this.authService.signup(username, email, password);
+  registerForm = new FormGroup(
+    {
+      userName: new FormControl('', Validators.required),
+      email: new FormControl('', [Validators.required, Validators.email]),
+      password: new FormControl('', Validators.required),
+      passwordConfirm: new FormControl('', Validators.required),
+    },
+    { validators: passwordMatch }
+  );
+
+  ngOnInit(): void {
+    this.authService.autoAuthUser();
+
+    if (this.authService.user.getValue()) {
+      this.router.navigate(['dashboard']);
+    }
+  }
+
+  onSubmit() {
+    if (!this.registerForm.invalid) {
+      const form = this.registerForm.value;
+      if (
+        form.email != null &&
+        form.userName != null &&
+        form.password != null
+      ) {
+        this.authService.register(form.userName, form.email, form.password);
+      }
     }
   }
 }
