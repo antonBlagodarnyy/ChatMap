@@ -1,9 +1,11 @@
 package com.example.ChatMap.Entities;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -58,7 +60,7 @@ public class User {
 		return this.username;
 	}
 
-	public void setName(String name) {
+	public void setUsername(String name) {
 		this.username = name;
 	}
 
@@ -67,4 +69,13 @@ public class User {
 		return "User [id=" + id + ", email=" + email + ", password=" + password + ", username=" + username + "]";
 	}
 
+	@OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
+	private UserLocation userLocation;
+	
+	public void setLocation(UserLocation location) {
+        this.userLocation = location;
+        if (location != null) {
+            location.setUser(this);
+        }
+    }
 }

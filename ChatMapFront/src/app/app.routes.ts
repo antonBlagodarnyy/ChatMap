@@ -4,6 +4,7 @@ import { SignupComponent } from './Components/auth/signup/signup.component';
 import { WelcomeComponent } from './Pages/welcome/welcome.component';
 import { DashboardComponent } from './Pages/dashboard/dashboard.component';
 import { AuthGuard } from './Guards/auth-guard';
+import { ChatComponent } from './Pages/chat/chat.component';
 
 export const routes: Routes = [
   {
@@ -18,8 +19,13 @@ export const routes: Routes = [
     ],
   },
   {
-    path:'dashboard',
-    component:DashboardComponent,
+    path: 'dashboard',
+    component: DashboardComponent,
     canActivate: [AuthGuard],
-  }
+  },
+  {
+    path: 'chat/:id',
+    component: ChatComponent,
+    canActivate: [AuthGuard],
+  },
 ];
