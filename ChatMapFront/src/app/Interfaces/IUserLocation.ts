@@ -1,4 +1,4 @@
-export type IUserLocation = {
+export interface IUserLocation  {
   id: number;
   
     latitude: number;

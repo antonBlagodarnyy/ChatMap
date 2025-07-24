@@ -1,4 +1,4 @@
-package com.example.ChatMap.Security;
+package com.example.ChatMap.Config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
