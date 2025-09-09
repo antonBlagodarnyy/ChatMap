@@ -12,7 +12,7 @@ import { Router } from 'express';
     <div class="container-user">
       <h2>{{ user?.username }}</h2>
     </div>
-    <a  routerLink="/dashboard" mat-button routerLinkActive="router-link-active" >Map</a>
+    <a  routerLink="/map" mat-button routerLinkActive="router-link-active" >Map</a>
     <button mat-raised-button (click)="logout()">Logout</button>
   </div>`,
   styles: `.router-link-active{

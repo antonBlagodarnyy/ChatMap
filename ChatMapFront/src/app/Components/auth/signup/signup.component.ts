@@ -41,7 +41,7 @@ export class SignupComponent {
     this.authService.autoAuthUser();
 
     if (this.authService.user.getValue()) {
-      this.router.navigate(['dashboard']);
+      this.router.navigate(['/map']);
     }
   }
 

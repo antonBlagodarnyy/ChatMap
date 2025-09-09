@@ -97,6 +97,7 @@ public class UserController {
 		if (userExists.isPresent()) {
 
 			final User user = userExists.get();
+			System.out.println(user);
 			return ResponseEntity.ok(user);
 		} else {
 			return ResponseEntity.notFound().build();

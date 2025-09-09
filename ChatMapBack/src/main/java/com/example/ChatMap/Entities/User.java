@@ -1,10 +1,15 @@
 package com.example.ChatMap.Entities;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
@@ -20,6 +25,19 @@ public class User {
 	private String password;
 	private String username;
 
+	@OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
+	private UserLocation userLocation;
+	
+	// Messages sent by this user
+	@JsonManagedReference
+    @OneToMany(mappedBy = "sender")
+    private List<Message> sentMessages;
+
+    // Messages received by this user
+	@JsonManagedReference
+    @OneToMany(mappedBy = "receiver")
+    private List<Message> receivedMessages;
+    
 	public User() {
 		super();
 	}
@@ -69,13 +87,31 @@ public class User {
 		return "User [id=" + id + ", email=" + email + ", password=" + password + ", username=" + username + "]";
 	}
 
-	@OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
-	private UserLocation userLocation;
-	
 	public void setLocation(UserLocation location) {
         this.userLocation = location;
         if (location != null) {
             location.setUser(this);
         }
     }
+	
+	public List<Message> getSentMessages() {
+		return sentMessages;
+	}
+
+	public void setSentMessages(List<Message> sentMessages) {
+		this.sentMessages = sentMessages;
+	}
+
+	public List<Message> getReceivedMessages() {
+		return receivedMessages;
+	}
+
+	public void setReceivedMessages(List<Message> receivedMessages) {
+		this.receivedMessages = receivedMessages;
+	}
+
+	
+	
+	
+
 }

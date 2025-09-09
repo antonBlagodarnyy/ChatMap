@@ -49,7 +49,7 @@ export class AuthService {
             this.saveAuthData(token, expirationDate, userId, userName);
             //TODO maybe take the method to the dashboard, so it retrieves the userLocation on refreshes
             this.locationService.getUsersLocation(userId, 'signup');
-            this.router.navigate(['/dashboard']);
+            this.router.navigate(['/map']);
           }
         },
         error: (err) => {
@@ -85,7 +85,7 @@ export class AuthService {
 
             this.saveAuthData(token, expirationDate, userId, userName);
             this.locationService.getUsersLocation(userId, 'login');
-            this.router.navigate(['dashboard']);
+            this.router.navigate(['/map']);
           }
         },
         error: (err) => {

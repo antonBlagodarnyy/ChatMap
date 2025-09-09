@@ -4,21 +4,22 @@ import { MatButtonModule } from '@angular/material/button';
 import { MapLoaderService } from '../../Services/map-loader.service';
 import { GoogleMapsModule, MapAdvancedMarker } from '@angular/google-maps';
 import { NgFor, NgIf } from '@angular/common';
-import { HeaderComponent } from '../../Components/dashboard/header/header.component';
+import { HeaderComponent } from '../../Components/map/header/header.component';
 import { LocationService } from '../../Services/location.service';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { IMarker } from '../../Interfaces/IMarker';
 
 import { IUserLocation } from '../../Interfaces/IUserLocation';
 import { MatIconModule } from '@angular/material/icon';
-import { MarkerComponent } from '../../Components/dashboard/marker/marker.component';
+import { MarkerComponent } from '../../Components/map/marker/marker.component';
 
-import {  Router } from '@angular/router';
+import { Router } from '@angular/router';
 
 import { UserService } from '../../Services/user.service';
+import { ChatService } from '../../Services/chat.service';
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-map',
   imports: [
     MatButtonModule,
     GoogleMapsModule,
@@ -28,7 +29,7 @@ import { UserService } from '../../Services/user.service';
     MapAdvancedMarker,
     MatIconModule,
   ],
-  templateUrl: './dashboard.component.html',
+  templateUrl: './map.component.html',
   styles: `
   .highlighted {
     color:green;
@@ -36,7 +37,7 @@ import { UserService } from '../../Services/user.service';
     filter: drop-shadow(0 0 8px rgba(0,0,0,0.5));
   }`,
 })
-export class DashboardComponent implements OnInit {
+export class MapComponent implements OnInit {
   mapReady = false;
 
   center = { lat: 40.7128, lng: -74.006 }; // Example: New York
@@ -57,6 +58,7 @@ export class DashboardComponent implements OnInit {
     private mapLoader: MapLoaderService,
     private locationService: LocationService,
     private userService: UserService,
+    private chatService: ChatService,
     private router: Router
   ) {}
 
@@ -90,7 +92,10 @@ export class DashboardComponent implements OnInit {
   }
   markerClicked(m: IMarker) {
     this.userService.getUserById(m.markerId).subscribe((user) => {
-      this.router.navigate(['chat/:' + user.username]);
+      console.log(user)
+      this.chatService.recipient = user;
+      this.chatService.saveRecipient();
+      this.router.navigate(['/chat']);
     });
   }
 }

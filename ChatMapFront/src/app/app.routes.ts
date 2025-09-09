@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './Components/auth/login/login.component';
 import { SignupComponent } from './Components/auth/signup/signup.component';
 import { WelcomeComponent } from './Pages/welcome/welcome.component';
-import { DashboardComponent } from './Pages/dashboard/dashboard.component';
+import { MapComponent } from './Pages/map/map.component';
 import { AuthGuard } from './Guards/auth-guard';
 import { ChatComponent } from './Pages/chat/chat.component';
 
@@ -19,12 +19,12 @@ export const routes: Routes = [
     ],
   },
   {
-    path: 'dashboard',
-    component: DashboardComponent,
+    path: 'map',
+    component: MapComponent,
     canActivate: [AuthGuard],
   },
   {
-    path: 'chat/:id',
+    path: 'chat',
     component: ChatComponent,
     canActivate: [AuthGuard],
   },
