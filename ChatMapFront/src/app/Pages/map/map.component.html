@@ -1,20 +1,3 @@
 <app-header></app-header>
 
-<google-map
-  *ngIf="mapReady"
-  height="100%"
-  width="100%"
-  [center]="{ lat: 37.38879837544912, lng: -6.011458446008968 }"
-  [zoom]="12"
-  mapId="24780a70d88dd2974f5bfa5b"
-  [options]="mapOptions"
->
-  <map-advanced-marker
-    *ngFor="let m of markers"
-    [position]="m.position"
-    [title]="m.label"
-    (mapClick)="markerClicked(m)"
-    [content]="m.content"
-  >
-  </map-advanced-marker>
-</google-map>
+Maps works!
