@@ -5,11 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
-import com.example.ChatMap.Dao.CustomUserDetails;
-import com.example.ChatMap.Entities.User;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
