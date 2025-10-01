@@ -1,12 +1,13 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { insertMessage } from "./controller";
+import { IMessage } from "./IMessage";
 
 const url = require("url");
 const jwt = require("jsonwebtoken");
 const wss = new WebSocketServer({ port: 8081 });
 
 // Maps user IDs (sub from JWT) to WebSocket connections
-const clients = new Map<string, WebSocket>();
+const clients = new Map<number, WebSocket>();
 
 wss.on("connection", function connection(ws, req) {
   console.log("Connected");
@@ -28,7 +29,7 @@ wss.on("connection", function connection(ws, req) {
     console.log("Authenticated user:", decoded.sub);
 
     // Save this user's WebSocket connection
-    clients.set(decoded.sub, ws);
+    clients.set(+decoded.sub, ws);
 
     // Store user info on the socket for later use
     (ws as any).user = decoded;
@@ -41,31 +42,31 @@ wss.on("connection", function connection(ws, req) {
   // Handle incoming messages
   ws.on("message", function message(data) {
     try {
-      const parsed = JSON.parse(data.toString());
+  
+      const parsed: IMessage = JSON.parse(data.toString());
 
-      const senderId = (ws as any).user.sub;
+      const senderId: number = (ws as any).user.sub;
+      console.log(senderId);
+      const { from, to, text } = parsed;
 
-      const { type, message, recipient } = parsed;
+      console.log(`Message from ${senderId} to ${to}: ${text}`);
 
-      console.log(
-        `Message from ${senderId} to ${recipient.username}: ${message}`
-      );
+      const recipientWs = clients.get(to);
 
-      const recipientWs = clients.get(recipient.username);
+      //push new message to the db
+      insertMessage(text, senderId, to);
 
-      //push new message to the db 
-      insertMessage(message, senderId, recipient.username);
-
+      //Send the msg
       if (recipientWs && recipientWs.readyState === WebSocket.OPEN) {
         recipientWs.send(
           JSON.stringify({
             from: senderId,
-            text: message,
+            to: to,
+            text: text,
           })
         );
       } else {
-        console.warn(`Recipient ${recipient.username} not connected.`);
-        // Optionally: queue the message or store it
+        console.warn(`Recipient ${to} not connected.`);
       }
     } catch (err) {
       console.error("Invalid message format", err);
@@ -80,6 +81,5 @@ wss.on("connection", function connection(ws, req) {
     }
   });
 
-  // Confirm connection
-  ws.send(JSON.stringify("Connected to WebSocket"));
+
 });

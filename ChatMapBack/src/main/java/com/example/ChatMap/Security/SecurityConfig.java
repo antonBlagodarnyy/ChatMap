@@ -52,7 +52,6 @@ public class SecurityConfig {
 		http
 				.csrf((csrf) -> csrf.disable())
 
-				.cors(cors -> cors.disable()) 
 				
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/users/signup", "/users/login", "/users/csrf/token", "users/hellow")
