@@ -25,6 +25,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 
 import com.example.ChatMap.Dto.LoginRequest;
 import com.example.ChatMap.Dto.SignupRequest;
+import com.example.ChatMap.Dto.UserResponse;
 import com.example.ChatMap.Entities.User;
 import com.example.ChatMap.Repositories.UserRepository;
 import com.example.ChatMap.Services.CustomUserDetailsService;
@@ -64,9 +65,9 @@ public class UserController {
 		userRepository.save(user);
 
 		final UserDetails userDetails = userDetailsService.loadUserByUsername(signupRequest.getUsername());
-		
+
 		final Integer userId = userRepository.findIdByUsername(userDetails.getUsername());
-		
+
 		final String jwt = jwtUtil.generateToken(userId);
 
 		// Save the user to the database
@@ -81,11 +82,11 @@ public class UserController {
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
 		final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
-		
+
 		final Integer userId = userRepository.findIdByUsername(userDetails.getUsername());
-		
+
 		final String jwt = jwtUtil.generateToken(userId);
-		
+
 		return ResponseEntity.ok(Map.of("jwt", jwt, "expires", jwtUtil.extractExpiration(jwt), "userId", userId,
 				"username", userDetails.getUsername()));
 	}
@@ -102,8 +103,8 @@ public class UserController {
 		if (userExists.isPresent()) {
 
 			final User user = userExists.get();
-			System.out.println(user);
-			return ResponseEntity.ok(user);
+			final UserResponse userResponse = new UserResponse(user.getId(), user.getUsername(), user.getEmail());
+			return ResponseEntity.ok(userResponse);
 		} else {
 			return ResponseEntity.notFound().build();
 		}

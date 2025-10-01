@@ -39,7 +39,9 @@ export class UserInfoComponent implements OnInit {
   ngOnInit(): void {
     this.userService.getUserById(this.data.featureData.id).subscribe((user) => {
       this.user = user;
+        console.log(this.user)
     });
+  
   }
 
   openChat(userId: number | undefined) {
