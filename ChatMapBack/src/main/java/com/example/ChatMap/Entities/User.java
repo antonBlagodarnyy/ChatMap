@@ -1,9 +1,6 @@
 package com.example.ChatMap.Entities;
 
-import java.util.Collection;
 import java.util.List;
-
-import org.springframework.security.core.GrantedAuthority;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
