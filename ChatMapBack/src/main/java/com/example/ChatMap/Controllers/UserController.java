@@ -64,11 +64,14 @@ public class UserController {
 		userRepository.save(user);
 
 		final UserDetails userDetails = userDetailsService.loadUserByUsername(signupRequest.getUsername());
-		final String jwt = jwtUtil.generateToken(userDetails);
+		
+		final Integer userId = userRepository.findIdByUsername(userDetails.getUsername());
+		
+		final String jwt = jwtUtil.generateToken(userId);
 
 		// Save the user to the database
 
-		return ResponseEntity.ok(Map.of("jwt", jwt, "expires", jwtUtil.extractExpiration(jwt), "user", user));
+		return ResponseEntity.ok(Map.of("jwt", jwt, "expires", jwtUtil.extractExpiration(jwt), "userId", userId));
 	}
 
 	@PostMapping(path = "/login")
@@ -78,9 +81,11 @@ public class UserController {
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
 		final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
-		final String jwt = jwtUtil.generateToken(userDetails);
+		
 		final Integer userId = userRepository.findIdByUsername(userDetails.getUsername());
-
+		
+		final String jwt = jwtUtil.generateToken(userId);
+		
 		return ResponseEntity.ok(Map.of("jwt", jwt, "expires", jwtUtil.extractExpiration(jwt), "userId", userId,
 				"username", userDetails.getUsername()));
 	}

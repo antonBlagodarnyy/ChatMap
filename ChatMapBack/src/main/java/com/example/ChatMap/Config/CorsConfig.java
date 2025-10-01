@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class CorsConfig implements WebMvcConfigurer {
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
-		registry.addMapping("/**").allowedOrigins("http://localhost:4200") // Angular dev server
+		registry.addMapping("/**").allowedOrigins("http://localhost:4200","http://localhost:50359/","http://localhost:61864/") // Angular dev server
 				.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS").allowedHeaders("*").allowCredentials(true) // ✅
 				.exposedHeaders("XSRF-TOKEN");
 	}

@@ -1,101 +1,67 @@
-import { Component, OnInit, ViewContainerRef } from '@angular/core';
-
-import { MatButtonModule } from '@angular/material/button';
-import { MapLoaderService } from '../../Services/map-loader.service';
-import { GoogleMapsModule, MapAdvancedMarker } from '@angular/google-maps';
-import { NgFor, NgIf } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import { HeaderComponent } from '../../Components/map/header/header.component';
-import { LocationService } from '../../Services/location.service';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { IMarker } from '../../Interfaces/IMarker';
-
-import { IUserLocation } from '../../Interfaces/IUserLocation';
+import Map from 'ol/Map.js';
+import View from 'ol/View.js';
+import OSM from 'ol/source/OSM.js';
+import TileLayer from 'ol/layer/Tile.js';
 import { MatIconModule } from '@angular/material/icon';
-import { MarkerComponent } from '../../Components/map/marker/marker.component';
-
-import { Router } from '@angular/router';
-
-import { UserService } from '../../Services/user.service';
-import { ChatService } from '../../Services/chat.service';
+import { MarkerService } from '../../Services/marker.service';
+import { MatDialog } from '@angular/material/dialog';
+import { UserInfoComponent } from '../../Components/map/user-info/user-info.component';
 
 @Component({
   selector: 'app-map',
-  imports: [
-    MatButtonModule,
-    GoogleMapsModule,
-    NgIf,
-    NgFor,
-    HeaderComponent,
-    MapAdvancedMarker,
-    MatIconModule,
-  ],
+  imports: [HeaderComponent, MatIconModule],
   templateUrl: './map.component.html',
-  styles: `
-  .highlighted {
-    color:green;
-    z-index: 1000;
-    filter: drop-shadow(0 0 8px rgba(0,0,0,0.5));
-  }`,
 })
 export class MapComponent implements OnInit {
-  mapReady = false;
-
-  center = { lat: 40.7128, lng: -74.006 }; // Example: New York
-  zoom = 12;
-
-  mapOptions: google.maps.MapOptions = {
-    streetViewControl: false,
-    fullscreenControl: false, // Optional: also hides fullscreen
-    mapTypeControl: false, // Optional: hides map type selector
-  };
-
-  locations = new Subject<IUserLocation[]>();
-
-  markers: IMarker[] = [];
+  map?: Map;
 
   constructor(
-    private vcRef: ViewContainerRef,
-    private mapLoader: MapLoaderService,
-    private locationService: LocationService,
-    private userService: UserService,
-    private chatService: ChatService,
-    private router: Router
+    private markerService: MarkerService,
+    private dialog: MatDialog
   ) {}
 
-  ngOnInit(): void {
-    this.mapLoader.load().then(() => {
-      this.mapReady = true;
-    });
+  async ngOnInit() {
+    const vectorLayer = await this.markerService.generateVectorLayer();
 
-    this.locations.subscribe((locations) => {
-      const markers: IMarker[] = [];
-
-      locations.forEach((loc) => {
-        const markerLabel = this.vcRef.createComponent(MarkerComponent);
-
-        markerLabel.instance.markerId = loc.id;
-
-        markers.push({
-          markerId: loc.id,
-          position: { lat: loc.latitude, lng: loc.longitude },
-          label: '' + loc.id,
-          content: markerLabel.location.nativeElement,
-        });
+    if (vectorLayer)
+      this.map = new Map({
+        layers: [new TileLayer({ source: new OSM({}) }), vectorLayer],
+        view: new View({
+          center: [0, 0],
+          zoom: 2,
+        }),
+        target: 'map',
       });
 
-      this.markers = markers;
-    });
+    // change mouse cursor when over marker
+    if (this.map)
+      this.map.on('pointermove', (e) => {
+        if (this.map) {
+          const hit = this.map.hasFeatureAtPixel(e.pixel);
+          this.map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+        }
+      });
 
-    this.locationService.getAllLocations().subscribe((res) => {
-      this.locations.next(res);
-    });
-  }
-  markerClicked(m: IMarker) {
-    this.userService.getUserById(m.markerId).subscribe((user) => {
-      console.log(user)
-      this.chatService.recipient = user;
-      this.chatService.saveRecipient();
-      this.router.navigate(['/chat']);
-    });
+    // display popup on click
+    if (this.map)
+      this.map.on('click', (evt) => {
+        if (this.map)
+          var feature = this.map.forEachFeatureAtPixel(
+            evt.pixel,
+            function (feature) {
+              return feature;
+            }
+          );
+
+        if (!feature) {
+          return;
+        }
+
+        this.dialog.open(UserInfoComponent, {
+          data: { featureData: feature.getProperties() },
+        });
+      });
   }
 }

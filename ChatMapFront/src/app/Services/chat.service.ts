@@ -8,7 +8,9 @@ import { IUser } from '../Interfaces/IUser';
 })
 export class ChatService {
   recipient: IUser | undefined;
-  subject: WebSocketSubject<unknown> | undefined;
+  subject:
+    | WebSocketSubject<{ from: number; to: number; text: string }>
+    | undefined;
 
   constructor(private authService: AuthService) {}
 
@@ -17,25 +19,25 @@ export class ChatService {
 
     if (token) {
       this.subject = webSocket('ws://localhost:8081?token=' + token);
-      this.subject.subscribe({
-        next: (value) => console.log('message received: ' + value), // Called whenever there is a message from the server.
-        error: (err) => console.log(err), // Called if at any point WebSocket API signals some kind of error.
-        complete: () => console.log('complete'), // Called when connection is closed (for whatever reason).
-      });
+      return this.subject;
     }
+    return undefined;
   }
 
   sendMsg(msg: string) {
     this.retrieveRecipient();
     if (this.subject) {
-      this.subject.subscribe();
-      this.subject.next({
-        type: 'message',
-        message: msg,
-        recipient: {username:this.recipient?.username,id:this.recipient?.id},
-      });
-      this.subject.complete();
-      this.subject.error({ code: 4000, reason: 'Smth broke' });
+      const currentUserId = this.authService.user.getValue()?.userId;
+      if (currentUserId && this.recipient?.id) {
+        this.subject.subscribe();
+        this.subject.next({
+          from: currentUserId,
+          to: this.recipient.id,
+          text: msg,
+        });
+        this.subject.complete();
+        this.subject.error({ code: 4000, reason: 'Smth broke' });
+      }
     }
   }
 
