@@ -1,15 +1,20 @@
 import { Injectable } from '@angular/core';
-import { AuthService } from './auth.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { IUserLocation } from '../Interfaces/IUserLocation';
-import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LocationService {
   constructor(private http: HttpClient) {}
+
+  async checkPermission() {
+    const permissonStatus = await navigator.permissions.query({
+      name: 'geolocation',
+    });
+    return permissonStatus.state == 'granted';
+  }
 
   getUsersLocation(userId: number, mode: 'login' | 'signup') {
     if (userId)
@@ -34,16 +39,21 @@ export class LocationService {
   }
 
   putUsersLocation(userId: number, lat: number, lon: number) {
-    this.http.put<IUserLocation>(environment.apiUrl + 'userslocations/put', {
-      id: userId,
-      latitude: lat,
-      longitude: lon,
-    }).subscribe();
+    this.http
+      .put<IUserLocation>(environment.apiUrl + 'userslocations/put', {
+        id: userId,
+        latitude: lat,
+        longitude: lon,
+      })
+      .subscribe();
   }
 
   getAllLocations() {
     return this.http.get<IUserLocation[]>(
       environment.apiUrl + 'userslocations/getAll'
     );
+  }
+  getLocationById(id: number) {
+    return this.http.get<IUserLocation>(environment.apiUrl + 'userslocations/byUser/'+id);
   }
 }

@@ -4,7 +4,6 @@ import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { IUserAuth } from '../Interfaces/IUserAuth';
-import { LocationService } from './location.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +16,6 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private locationService: LocationService
   ) {}
 
   register(username: string, email: string, password: string) {
@@ -26,15 +24,16 @@ export class AuthService {
       .post<{
         jwt: string;
         expires: string;
-        user: { id: number; email: string; password: string; username: string };
+         userId: number; 
+         username:string;
       }>(environment.apiUrl + 'users/signup', authData)
       .subscribe({
         next: (response) => {
           console.log(response);
           const token = response.jwt;
           const expires = response.expires;
-          const userId = response.user.id;
-          const userName = response.user.username;
+          const userId = response.userId;
+          const userName = response.username;
 
           if (token && expires && userId) {
             const expirationDate = new Date(expires);
@@ -47,9 +46,8 @@ export class AuthService {
             });
 
             this.saveAuthData(token, expirationDate, userId, userName);
-            //TODO maybe take the method to the dashboard, so it retrieves the userLocation on refreshes
-            this.locationService.getUsersLocation(userId, 'signup');
-            this.router.navigate(['/map']);
+
+            this.router.navigate(['/location']);
           }
         },
         error: (err) => {
@@ -84,7 +82,7 @@ export class AuthService {
             });
 
             this.saveAuthData(token, expirationDate, userId, userName);
-            this.locationService.getUsersLocation(userId, 'login');
+
             this.router.navigate(['/map']);
           }
         },
