@@ -5,7 +5,6 @@ import {
   GuardResult,
   MaybeAsync,
   Router,
-  RouterOutlet,
   RouterStateSnapshot,
 } from '@angular/router';
 import { map, take } from 'rxjs';
@@ -20,14 +19,15 @@ export class AuthGuard implements CanActivate {
     state: RouterStateSnapshot
   ): MaybeAsync<GuardResult> {
     this.authService.autoAuthUser();
-    return this.authService.user.pipe(take(1), map(user => {
-
-
-        if(user){
+    return this.authService.user.pipe(
+      take(1),
+      map((user) => {
+        if (user) {
           return true;
         } else {
-          return this.router.createUrlTree(['/'])
+          return this.router.createUrlTree(['/']);
         }
-    }));
+      })
+    );
   }
 }

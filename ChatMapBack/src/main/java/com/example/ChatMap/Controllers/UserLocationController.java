@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.ChatMap.Dto.LocationRequest;
+import com.example.ChatMap.Dto.LocationResponse;
+import com.example.ChatMap.Dto.UserResponse;
 import com.example.ChatMap.Entities.User;
 import com.example.ChatMap.Entities.UserLocation;
 import com.example.ChatMap.Repositories.UserLocationRepository;
@@ -49,6 +52,17 @@ public class UserLocationController {
 	public @ResponseBody ResponseEntity<?> getAllLocations() {
 
 		return ResponseEntity.ok(userLocationRepository.findAll());
+	}
+
+	@GetMapping(path = "/byUser/{id}")
+	public @ResponseBody ResponseEntity<?> getLocationByUserId(@PathVariable("id") Integer id) {
+		UserLocation location = userLocationRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("User not found"));
+
+		LocationResponse locationResponse = new LocationResponse(location.getId(), location.getLatitude(),
+				location.getLongitude());
+		
+		return ResponseEntity.ok(locationResponse);
 	}
 
 	@PutMapping(path = "/put")

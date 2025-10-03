@@ -5,6 +5,8 @@ import { WelcomeComponent } from './Pages/welcome/welcome.component';
 import { MapComponent } from './Pages/map/map.component';
 import { AuthGuard } from './Guards/auth-guard';
 import { ChatComponent } from './Pages/chat/chat.component';
+import { LocationComponent } from './Pages/location/location.component';
+import { locationGuard } from './Guards/location.guard';
 
 export const routes: Routes = [
   {
@@ -18,14 +20,15 @@ export const routes: Routes = [
       { path: 'signup', component: SignupComponent },
     ],
   },
+  { path: 'location', component: LocationComponent, canActivate: [AuthGuard] },
   {
     path: 'map',
     component: MapComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, locationGuard],
   },
   {
     path: 'chat',
     component: ChatComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, locationGuard],
   },
 ];
