@@ -67,7 +67,8 @@ public class UserController {
 
 		// Save the user to the database
 
-		return ResponseEntity.ok(Map.of("jwt", jwt, "expires", jwtUtil.extractExpiration(jwt), "userId", userId));
+		return ResponseEntity.ok(Map.of("jwt", jwt, "expires", jwtUtil.extractExpiration(jwt), "userId", userId,
+				"username", userDetails.getUsername()));
 	}
 
 	@PostMapping(path = "/login")
