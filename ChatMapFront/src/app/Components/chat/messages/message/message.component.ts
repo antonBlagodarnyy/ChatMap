@@ -1,15 +1,29 @@
-import { Component } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
+import { Component, input, OnInit } from '@angular/core';
+import { MatChipsModule } from '@angular/material/chips';
+import { IMessage } from '../../../../Interfaces/IMessage';
 
 @Component({
   selector: 'app-message',
-  imports: [MatCardModule],
-  template: `<mat-card>
-    <mat-card-title>{{ sender }}</mat-card-title>
-    <mat-card-content>{{ msg }}</mat-card-content>
-  </mat-card>`,
+  imports: [MatChipsModule],
+  template: `<div class="container-messages-message">
+    <mat-chip>{{ message().sender }}</mat-chip>
+    <span class="text">{{ message().text }}</span>
+  </div>`,
+  styles: `
+  .container-messages-message{
+    margin:2vh;
+    border-radius:1vh;
+    display: flex;
+    align-items: center;
+      background-color:#EBEBEB;
+  }
+  .text{
+    margin-left:2vh;
+  }`,
 })
-export class MessageComponent {
-  sender?: string;
-  msg?: string;
+export class MessageComponent implements OnInit{
+ 
+  message = input.required<IMessage>();
+   ngOnInit(): void {
+  }
 }
