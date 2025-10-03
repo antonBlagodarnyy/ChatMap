@@ -1,35 +1,50 @@
-import { Component, OnInit, ViewContainerRef } from '@angular/core';
-import { ChatService } from '../../../Services/chat.service';
+import {
+  AfterViewChecked,
+  Component,
+  ElementRef,
+  input,
+  ViewChild,
+} from '@angular/core';
 import { MessageComponent } from './message/message.component';
-import { UserService } from '../../../Services/user.service';
+import { NgFor } from '@angular/common';
+import { IMessage } from '../../../Interfaces/IMessage';
+import { HeaderComponent } from '../../map/header/header.component';
+import { MessagesHeaderComponent } from '../messages-header/messages-header.component';
 
 @Component({
   selector: 'app-messages',
-  imports: [],
-  template: `<p>Messages work</p>`,
-})
-export class MessagesComponent implements OnInit {
-  constructor(
-    private chatService: ChatService,
-    private viewContainerRef: ViewContainerRef,
-    private userService: UserService
-  ) {}
+  imports: [NgFor, MessageComponent, MessagesHeaderComponent],
+  template: ` <div class="container-messages" #containerMessages>
+  <app-messages-header/>
 
-  ngOnInit(): void {
-    this.chatService.connect()?.subscribe({
-      next: (value) => {
-        console.log('message received: ' + value);
-        const message = this.viewContainerRef.createComponent(MessageComponent);
-        this.userService
-          .getUserById(value.from)
-          .subscribe((u) => (message.instance.sender = u.username));
-        message.instance.msg = value.text;
-      }, // Called whenever there is a message from the server.
-      error: (err) => console.log(err), // Called if at any point WebSocket API signals some kind of error.
-      complete: () => console.log('complete'), // Called when connection is closed (for whatever reason).
-    });
+    <div *ngFor="let msg of messages()">
+      <app-message [message]="msg"></app-message>
+    </div>
+  </div>`,
+  styles: `.container-messages{
+    border: 1px solid black;
+    border-radius:5vh;
+    padding:2vh;
+    height: 60vh;
+    overflow: auto;
   }
-  //TODO fetch messages from db and show already stored messages
+  /* Hide scrollbar for Chrome, Safari and Opera */
+.container-messages::-webkit-scrollbar {
+  display: none;
+}
 
-  //TODO connect to the websocket and on next render a new message
+/* Hide scrollbar for IE, Edge and Firefox */
+.container-messages {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}`,
+})
+export class MessagesComponent implements AfterViewChecked {
+  @ViewChild('containerMessages')
+  chatContainer!: ElementRef;
+  messages = input<IMessage[] | undefined>();
+  ngAfterViewChecked(): void {
+    this.chatContainer.nativeElement.scrollTop =
+      this.chatContainer.nativeElement.scrollHeight;
+  }
 }
