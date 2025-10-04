@@ -13,19 +13,22 @@ import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, MatButtonModule,MatFormFieldModule, MatInputModule],
+  imports: [
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+  ],
   templateUrl: './login.component.html',
   styleUrl: './../auth.styles.css',
 })
 export class LoginComponent {
   constructor(private authService: AuthService, private router: Router) {}
   loginForm = new FormGroup({
-    username: new FormControl('', [Validators.required,]),
+    username: new FormControl('', [Validators.required]),
     password: new FormControl('', Validators.required),
   });
   ngOnInit(): void {
-    this.authService.autoAuthUser();
-
     if (this.authService.user.getValue()) {
       this.router.navigate(['/location']);
     }
@@ -34,7 +37,14 @@ export class LoginComponent {
     if (!this.loginForm.invalid) {
       const form = this.loginForm.value;
       if (form.username != null && form.password != null) {
-        this.authService.login(form.username, form.password);
+        this.authService.login$(form.username, form.password).subscribe({
+          next: () => {
+            this.router.navigate(['/map']);
+          },
+          error: (err) => {
+            console.error(err);
+          },
+        });
       }
     }
   }

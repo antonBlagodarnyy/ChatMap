@@ -2,38 +2,68 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, tap } from 'rxjs';
 import { IUserAuth } from '../Interfaces/IUserAuth';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  user = new BehaviorSubject<IUserAuth | null>(null);
+  user = new BehaviorSubject<IUserAuth | null>(this.getAuthData());
 
   private tokenTimer?: ReturnType<typeof setInterval> | null;
 
-  constructor(
-    private http: HttpClient,
-    private router: Router,
-  ) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
-  register(username: string, email: string, password: string) {
-    const authData = { username: username, email: email, password: password };
-    this.http
+  login$(username: string, password: string) {
+    const authData = { username: username, password: password };
+    return this.http
       .post<{
         jwt: string;
         expires: string;
-         userId: number; 
-         username:string;
+        userId: number;
+        username: string;
+      }>(environment.apiUrl + 'users/login', authData, {
+        withCredentials: true,
+      })
+      .pipe(
+        tap((r) => {
+          const token = r.jwt;
+          const expirationDate = new Date(r.expires);
+          const userId = r.userId;
+          const userName = r.username;
+
+          if (token && expirationDate && userId) {
+            this.setAuthTimer(expirationDate);
+
+            this.user.next({
+              token: token,
+              expirationDate: expirationDate,
+              userId: userId,
+              username: userName,
+            });
+
+            this.saveAuthData(token, expirationDate, userId, userName);
+          }
+        })
+      );
+  }
+
+  signin$(username: string, email: string, password: string) {
+    const authData = { username: username, email: email, password: password };
+    return this.http
+      .post<{
+        jwt: string;
+        expires: string;
+        userId: number;
+        username: string;
       }>(environment.apiUrl + 'users/signup', authData)
-      .subscribe({
-        next: (response) => {
-          console.log(response);
-          const token = response.jwt;
-          const expires = response.expires;
-          const userId = response.userId;
-          const userName = response.username;
+      .pipe(
+        tap((r) => {
+          const token = r.jwt;
+          const expires = r.expires;
+          const userId = r.userId;
+          const userName = r.username;
 
           if (token && expires && userId) {
             const expirationDate = new Date(expires);
@@ -49,68 +79,22 @@ export class AuthService {
 
             this.router.navigate(['/location']);
           }
-        },
-        error: (err) => {
-          console.log(err);
-        },
-      });
+        })
+      );
   }
-  login(username: string, password: string) {
-    const authData = { username: username, password: password };
-    this.http
-      //TODO change userId and username to a user obj
-      .post<{ jwt: string; expires: string; userId: number; username: string }>(
-        environment.apiUrl + 'users/login',
-        authData,
-        { withCredentials: true }
-      )
-      .subscribe({
-        next: (response) => {
-          const token = response.jwt;
-          const expirationDate = new Date(response.expires);
-          const userId = response.userId;
-          const userName = response.username;
 
-          if (token && expirationDate && userId) {
-            this.setAuthTimer(expirationDate);
-
-            this.user.next({
-              token: token,
-              expirationDate: expirationDate,
-              userId: userId,
-              username: userName,
-            });
-
-            this.saveAuthData(token, expirationDate, userId, userName);
-
-            this.router.navigate(['/map']);
-          }
-        },
-        error: (err) => {
-          return err;
-        },
-      });
-  }
-  autoAuthUser() {
-    const authInformation = this.getAuthData();
-    if (!authInformation) {
-      this.user.next(null);
-      return;
-    }
-    const expirationDate = authInformation.expirationDate;
-    if (expirationDate > new Date()) {
-      this.user.next(authInformation);
-      this.setAuthTimer(expirationDate);
-    }
-  }
-  logout() {
+  clearUser() {
     this.user.next(null);
     this.clearAuthData();
-    this.router.navigate(['/']);
+  }
+  private clearAuthData() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('expiration');
+    localStorage.removeItem('userId');
   }
   private setAuthTimer(expires: Date) {
     this.tokenTimer = setTimeout(() => {
-      this.logout();
+      this.clearUser();
     }, expires.getTime() - new Date().getTime());
   }
   private saveAuthData(
@@ -124,11 +108,7 @@ export class AuthService {
     localStorage.setItem('userId', JSON.stringify(userId));
     localStorage.setItem('username', username);
   }
-  private clearAuthData() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('expiration');
-    localStorage.removeItem('userId');
-  }
+
   private getAuthData(): IUserAuth | null {
     const token = localStorage.getItem('token');
     const expirationDateRaw = localStorage.getItem('expiration');
@@ -140,6 +120,8 @@ export class AuthService {
     }
     const userId = JSON.parse(userIdRaw);
     const expirationDate = new Date(expirationDateRaw);
+
+    this.setAuthTimer(expirationDate);
 
     return {
       token,

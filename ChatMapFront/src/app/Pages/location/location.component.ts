@@ -42,15 +42,14 @@ import { ErrorComponent } from '../../Components/error/error.component';
     margin:5vh;
   }`,
 })
-export class LocationComponent implements OnInit {
+export class LocationComponent {
   constructor(
     private authService: AuthService,
     private locationService: LocationService,
-    private dialogRef: MatDialog
+    private dialogRef: MatDialog,
+    private router: Router
   ) {}
-  ngOnInit(): void {
-    this.authService.autoAuthUser();
-  }
+
   uploadLocation() {
     const userId = this.authService.user.getValue()?.userId;
     if (userId) {
@@ -78,12 +77,11 @@ export class LocationComponent implements OnInit {
             });
           },
         });
-    } else {
-      this.authService.logout();
     }
   }
 
   signout() {
-    this.authService.logout();
+    this.authService.clearUser();
+    this.router.navigate(['/']);
   }
 }
