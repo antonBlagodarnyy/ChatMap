@@ -2,17 +2,18 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../../Services/auth.service';
 import { IUserAuth } from '../../../Interfaces/IUserAuth';
 import { MatButtonModule } from '@angular/material/button';
-import { ActivatedRoute, Route, RouterLink, RouterLinkActive } from '@angular/router';
-import { Router } from 'express';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-header',
-  imports: [MatButtonModule, RouterLink,RouterLinkActive],
+  imports: [MatButtonModule, RouterLink, RouterLinkActive],
   template: `<div class="container">
     <div class="container-user">
       <h2>{{ user?.username }}</h2>
     </div>
-    <a  routerLink="/map" mat-button routerLinkActive="router-link-active" >Map</a>
+    <a routerLink="/map" mat-button routerLinkActive="router-link-active"
+      >Map</a
+    >
     <button mat-raised-button (click)="logout()">Logout</button>
   </div>`,
   styles: `.router-link-active{
@@ -28,13 +29,12 @@ import { Router } from 'express';
 export class HeaderComponent implements OnInit {
   protected user?: IUserAuth | null;
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) {}
   ngOnInit(): void {
-
     this.authService.user.subscribe((user) => (this.user = user));
   }
   logout() {
-    this.authService.logout();
+    this.authService.clearUser();
+    this.router.navigate(['/']);
   }
-
 }

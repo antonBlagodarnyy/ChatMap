@@ -38,8 +38,6 @@ export class SignupComponent {
   );
 
   ngOnInit(): void {
-    this.authService.autoAuthUser();
-
     if (this.authService.user.getValue()) {
       this.router.navigate(['/location']);
     }
@@ -53,7 +51,16 @@ export class SignupComponent {
         form.userName != null &&
         form.password != null
       ) {
-        this.authService.register(form.userName, form.email, form.password);
+        this.authService
+          .signin$(form.userName, form.email, form.password)
+          .subscribe({
+            next: () => {
+              this.router.navigate(['/location']);
+            },
+            error: (err) => {
+              console.error(err);
+            },
+          });
       }
     }
   }
