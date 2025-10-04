@@ -11,14 +11,13 @@ import { map, take } from 'rxjs';
 import { AuthService } from '../Services/auth.service';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class NoAuthGuard implements CanActivate {
   constructor(private authService: AuthService, private router: Router) {}
 
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): MaybeAsync<GuardResult> {
-
     return this.authService.user.pipe(
       take(1),
       map((user) => {
