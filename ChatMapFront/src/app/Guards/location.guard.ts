@@ -13,7 +13,7 @@ export const locationGuard: CanActivateFn = (route, state) => {
   const userId = authService.user.getValue()?.userId;
 
   if (userId) {
-    return locationService.getLocationById(userId).pipe(
+    return locationService.getLocationById$(userId).pipe(
       take(1),
       map((l) => {
         if (l) return true;
