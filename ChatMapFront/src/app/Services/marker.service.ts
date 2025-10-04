@@ -34,7 +34,7 @@ export class MarkerService {
     const markers: Feature[] = [];
 
     const usersLocations = await firstValueFrom(
-      this.locationService.getAllLocations()
+      this.locationService.getAllLocations$()
     );
 
     for (const e of usersLocations) {
