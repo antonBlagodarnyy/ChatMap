@@ -7,7 +7,7 @@ import Icon from 'ol/style/Icon';
 import Style from 'ol/style/Style';
 import { LocationService } from './location.service';
 import { IUserLocation } from '../Interfaces/IUserLocation';
-import { firstValueFrom } from 'rxjs';
+import { combineLatest, map, } from 'rxjs';
 import { fromLonLat } from 'ol/proj';
 
 @Injectable({
@@ -16,35 +16,68 @@ import { fromLonLat } from 'ol/proj';
 export class MarkerService {
   constructor(private locationService: LocationService) {}
 
-  generateMarker(userLocation: IUserLocation) {
-    const markerFeature = new Feature({
-      geometry: new Point(fromLonLat([userLocation.longitude,userLocation.latitude ])),
+  userFeature(userLocation: IUserLocation, authLocation: boolean) {
+    const userFeature = new Feature({
+      geometry: new Point(
+        fromLonLat([userLocation.longitude, userLocation.latitude])
+      ),
       name: 'User',
       id: userLocation.id,
     });
-    const markerStyle = new Style({
+    const userStyle = new Style({
       image: new Icon({
-        src: 'person_pin_circle.svg',
+        src: authLocation ? 'location_on.svg' : 'person_pin_circle.svg',
       }),
     });
-    markerFeature.setStyle(markerStyle);
-    return markerFeature;
+    userFeature.setStyle(userStyle);
+    return userFeature;
   }
-  async generateVectorLayer() {
-    const markers: Feature[] = [];
 
-    const usersLocations = await firstValueFrom(
-      this.locationService.getAllLocations$()
+  usersMarkers$() {
+    return combineLatest([
+      this.locationService.getAllLocations$(),
+      this.locationService.authUserLocation$(),
+    ]).pipe(
+      map(([allLocations, authLocation]) => {
+        return allLocations
+          .filter(
+            (l) =>
+              l.latitude != authLocation.latitude &&
+              l.longitude != authLocation.longitude
+          )
+          .map((l) => this.userFeature(l, false));
+      })
     );
+  }
+  authUserMarker$() {
+    return this.locationService.authUserLocation$().pipe(
+      map((l) => {
+        return this.userFeature(l, true);
+      })
+    );
+  }
 
-    for (const e of usersLocations) {
-      markers.push(this.generateMarker(e));
-    }
-
-    const vectorSource = new VectorSource({
-      features: markers,
-    });
-
-    return new VectorLayer({ source: vectorSource });
+  usersLayer$() {
+    return this.usersMarkers$().pipe(
+      map((markers) => {
+        const vectorSource = new VectorSource({
+          features: markers,
+        });
+        return new VectorLayer({ source: vectorSource });
+      })
+    );
+  }
+  authUserLayer$() {
+    return this.authUserMarker$().pipe(
+      map((marker) => {
+        const vectorSource = new VectorSource({
+          features: [marker],
+        });
+        return new VectorLayer({
+          source: vectorSource,
+          properties: { name: 'authUserLayer' },
+        });
+      })
+    );
   }
 }
