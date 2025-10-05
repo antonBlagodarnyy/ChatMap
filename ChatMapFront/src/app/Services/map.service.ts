@@ -10,6 +10,7 @@ import { UserInfoComponent } from '../Components/map/user-info/user-info.compone
 import { LocationService } from './location.service';
 import { fromLonLat } from 'ol/proj';
 import Layer from 'ol/layer/Layer';
+import XYZ from 'ol/source/XYZ';
 
 @Injectable({
   providedIn: 'root',
@@ -29,7 +30,16 @@ export class MapService {
     ]).pipe(
       map(([ul, al, aLocation]) => {
         const map = new Map({
-          layers: [new TileLayer({ source: new OSM({}) }), ul, al],
+          layers: [
+            new TileLayer({
+              source: new XYZ({
+                url: 'https://cartodb-basemaps-{a-d}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png',
+    attributions: '© OpenStreetMap contributors © CARTO',
+              }),
+            }),
+            ul,
+            al,
+          ],
           view: new View({
             center: fromLonLat([aLocation.longitude, aLocation.latitude]),
             zoom: 15,
