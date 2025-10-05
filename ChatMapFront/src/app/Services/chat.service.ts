@@ -15,7 +15,7 @@ export class ChatService {
   constructor(private authService: AuthService) {}
 
   connect() {
-    const token = this.authService.user.value?.token;
+    const token = this.authService.user$.value?.token;
 
     if (token) {
       this.subject = webSocket('ws://localhost:8081?token=' + token);
@@ -27,7 +27,7 @@ export class ChatService {
   sendMsg(msg: string) {
     this.retrieveRecipient();
     if (this.subject) {
-      const currentUserId = this.authService.user.getValue()?.userId;
+      const currentUserId = this.authService.user$.getValue()?.userId;
       if (currentUserId && this.recipient?.id) {
         this.subject.subscribe();
         this.subject.next({

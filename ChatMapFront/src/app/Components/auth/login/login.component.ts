@@ -29,7 +29,7 @@ export class LoginComponent {
     password: new FormControl('', Validators.required),
   });
   ngOnInit(): void {
-    if (this.authService.user.getValue()) {
+    if (this.authService.user$.getValue()) {
       this.router.navigate(['/location']);
     }
   }
