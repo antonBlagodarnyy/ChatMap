@@ -10,7 +10,9 @@ import com.example.ChatMap.Entities.User;
 
 public interface UserRepository extends CrudRepository<User, Integer> {
 	User findByUsername(String username);
-	
+
+	User findByEmail(String email);
+
 	@Query("SELECT u.id FROM User u WHERE u.username = :username")
 	Integer findIdByUsername(String username);
 }
