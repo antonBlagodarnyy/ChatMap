@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { IUserLocation } from '../Interfaces/IUserLocation';
 import { AuthService } from './auth.service';
+import { EMPTY, from } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -17,10 +18,12 @@ export class LocationService {
     return permissonStatus.state == 'granted';
   }
 
-  askUserForLocation() {
-    return new Promise<GeolocationPosition>((res, rej) => {
-      navigator.geolocation.getCurrentPosition(res, rej);
-    });
+  askUserForLocation$() {
+    return from(
+      new Promise<GeolocationPosition>((res, rej) => {
+        navigator.geolocation.getCurrentPosition(res, rej);
+      })
+    );
   }
 
   postUsersLocation$(userId: number, lat: number, lon: number) {
@@ -54,5 +57,10 @@ export class LocationService {
     return this.http.get<IUserLocation>(
       environment.apiUrl + 'userslocations/byUser/' + id
     );
+  }
+  authUserLocation$() {
+    const userId = this.authService.user$.getValue()?.userId;
+    if (userId) return this.getLocationById$(userId);
+    else return EMPTY;
   }
 }

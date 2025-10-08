@@ -18,7 +18,7 @@ export class NoAuthGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): MaybeAsync<GuardResult> {
-    return this.authService.user.pipe(
+    return this.authService.user$.pipe(
       take(1),
       map((user) => {
         if (user) {

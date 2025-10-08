@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { AuthService } from '../../Services/auth.service';
 import { LocationService } from '../../Services/location.service';
 import { MatCard, MatCardModule } from '@angular/material/card';
 import { MatButton } from '@angular/material/button';
 import { Router } from '@angular/router';
-import { from, switchMap } from 'rxjs';
+import {  switchMap } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogSuccessComponent } from './dialog-success/dialog-success.component';
 import { ErrorComponent } from '../../Components/error/error.component';
@@ -51,13 +51,10 @@ export class LocationComponent {
   ) {}
 
   uploadLocation() {
-    const userId = this.authService.user.getValue()?.userId;
+    const userId = this.authService.user$.getValue()?.userId;
     if (userId) {
-      const askUserForLocation$ = from(
-        this.locationService.askUserForLocation()
-      );
-
-      askUserForLocation$
+      this.locationService
+        .askUserForLocation$()
         .pipe(
           switchMap((position) =>
             this.locationService.postUsersLocation$(

@@ -1,4 +1,3 @@
-import { NgIf } from '@angular/common';
 import { Component } from '@angular/core';
 import { passwordMatch } from './ValidationFunctions';
 import {
@@ -38,7 +37,7 @@ export class SignupComponent {
   );
 
   ngOnInit(): void {
-    if (this.authService.user.getValue()) {
+    if (this.authService.user$.getValue()) {
       this.router.navigate(['/location']);
     }
   }

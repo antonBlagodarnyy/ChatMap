@@ -9,7 +9,7 @@ import { IUserAuth } from '../Interfaces/IUserAuth';
   providedIn: 'root',
 })
 export class AuthService {
-  user = new BehaviorSubject<IUserAuth | null>(this.getAuthData());
+  user$ = new BehaviorSubject<IUserAuth | null>(this.getAuthData());
 
   private tokenTimer?: ReturnType<typeof setInterval> | null;
 
@@ -36,7 +36,7 @@ export class AuthService {
           if (token && expirationDate && userId) {
             this.setAuthTimer(expirationDate);
 
-            this.user.next({
+            this.user$.next({
               token: token,
               expirationDate: expirationDate,
               userId: userId,
@@ -68,7 +68,7 @@ export class AuthService {
           if (token && expires && userId) {
             const expirationDate = new Date(expires);
             this.setAuthTimer(expirationDate);
-            this.user.next({
+            this.user$.next({
               token: token,
               expirationDate: expirationDate,
               userId: userId,
@@ -84,7 +84,7 @@ export class AuthService {
   }
 
   clearUser() {
-    this.user.next(null);
+    this.user$.next(null);
     this.clearAuthData();
   }
   private clearAuthData() {
