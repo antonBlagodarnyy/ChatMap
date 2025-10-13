@@ -1,0 +1,38 @@
+package com.ChatMap.Profile.Controllers;
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.ChatMap.Profile.Dto.CreateRequest;
+import com.ChatMap.Profile.Entities.Profile;
+import com.ChatMap.Profile.Services.ProfileService;
+
+@Controller
+@RequestMapping(path = "/profile")
+@RestController
+public class ProfileController {
+
+	@Autowired
+	ProfileService profileService;
+
+	@PostMapping("/create")
+	public @ResponseBody ResponseEntity<?> createProfile(@RequestBody CreateRequest createRequest) {
+		Profile profile = profileService.saveProfile(createRequest);
+		return ResponseEntity.ok(Map.of("Username", profile.getUsername()));
+	}
+
+	@GetMapping("/username")
+	public @ResponseBody ResponseEntity<?> getUsername(@RequestHeader("Authorization") String authorizationHeader) {
+		return ResponseEntity.ok(Map.of("Username", profileService.getUsername(authorizationHeader)));
+	}
+}
