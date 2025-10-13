@@ -79,7 +79,6 @@ export class AuthService {
   private clearAuthData() {
     localStorage.removeItem('token');
     localStorage.removeItem('expiration');
-    localStorage.removeItem('userId');
   }
   private setAuthTimer(expires: Date) {
     this.tokenTimer = setTimeout(() => {
