@@ -43,9 +43,9 @@ public class AuthController {
 	}
 
 	@PostMapping(path = "/delete")
-	public @ResponseBody ResponseEntity<Void> deleteUser(@RequestHeader("Authorization") String authorizationHeader)
+	public @ResponseBody ResponseEntity<Void> deleteUser()
 			throws Exception {
-		authService.deleteUser(authorizationHeader);
+		authService.deleteUser();
 		return ResponseEntity.ok().build();
 	}
 }

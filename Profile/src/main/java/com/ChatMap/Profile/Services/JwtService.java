@@ -29,15 +29,5 @@ public class JwtService {
 		return decodedJWT;
 	}
 
-	public Integer extractUserId(String authorizationHeader) {
-		String jwt = null;
-		DecodedJWT decodedJwt = null;
-
-		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-			jwt = authorizationHeader.substring(7);
-			decodedJwt = this.decodeJwt(jwt);
-		}
-		String userId = decodedJwt.getSubject();
-		return Integer.valueOf(userId);
-	}
+	
 }

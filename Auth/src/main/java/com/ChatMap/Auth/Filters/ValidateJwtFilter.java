@@ -1,4 +1,4 @@
-package com.ChatMap.Profile.Filters;
+package com.ChatMap.Auth.Filters;
 
 import java.io.IOException;
 import java.util.List;
@@ -8,7 +8,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.ChatMap.Profile.Services.JwtService;
+import com.ChatMap.Auth.Services.JwtService;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
@@ -25,25 +25,29 @@ public class ValidateJwtFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
+		try {
+			final String authorizationHeader = request.getHeader("Authorization");
 
-		final String authorizationHeader = request.getHeader("Authorization");
+			String jwt = null;
+			DecodedJWT decodedJwt = null;
 
-		String jwt = null;
-		DecodedJWT decodedJwt = null;
+			if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+				jwt = authorizationHeader.substring(7);
+				decodedJwt = jwtService.decodeJwt(jwt);
+			}
+			String userId = decodedJwt.getSubject();
 
-		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-			jwt = authorizationHeader.substring(7);
-			decodedJwt = jwtService.decodeJwt(jwt);
+			if (userId == null)
+				throw new JWTVerificationException("No user in the jwt");
+
+			UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(Integer.parseInt(userId), null,
+					List.of());
+
+			SecurityContextHolder.getContext().setAuthentication(authToken);
+		}	catch(Exception e) {
+			System.out.println("JWT validation failed: " + e.getMessage());
 		}
-		String userId = decodedJwt.getSubject();
-
-		if (userId == null)
-			throw new JWTVerificationException("No user in the jwt");
-
-		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(Integer.parseInt(userId), null,
-				List.of());
-
-		SecurityContextHolder.getContext().setAuthentication(authToken);
+		
 
 		filterChain.doFilter(request, response);
 	}

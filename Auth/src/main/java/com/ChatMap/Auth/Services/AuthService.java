@@ -1,7 +1,7 @@
 package com.ChatMap.Auth.Services;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +41,7 @@ public class AuthService {
 
 
 	public String loginUser(LoginRequest loginRequest) {
-		System.out.println(loginRequest.getEmail());
+
 		User user = userRepository.findByEmail(loginRequest.getEmail());
 
 		if (user == null)
@@ -55,8 +55,9 @@ public class AuthService {
 
 	}
 
-	public void deleteUser(String jwt) {
+	public void deleteUser() {
+		Integer userId = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-		userRepository.deleteById(jwtService.extractUserId(jwt));
+		userRepository.deleteById(userId);
 	}
 }

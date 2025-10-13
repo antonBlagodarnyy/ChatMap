@@ -23,17 +23,18 @@ public class ProfileService {
 		// TODO add exceptions
 		Profile profile = null;
 
-		String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		Integer userId = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-		profile = new Profile(Integer.valueOf(userId), createRequest.getUsername());
+		profile = new Profile(userId, createRequest.getUsername());
 
 		profileRepository.save(profile);
 
 		return profile;
 	}
 
-	public String getUsername(String authorizationHeader) {
-		Optional<Profile> profileOpt = profileRepository.findById(jwtService.extractUserId(authorizationHeader));
+	public String getUsername() {
+		Integer userId = (Integer) (SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		Optional<Profile> profileOpt = profileRepository.findById(userId);
 
 		Profile profile = profileOpt.get();
 
