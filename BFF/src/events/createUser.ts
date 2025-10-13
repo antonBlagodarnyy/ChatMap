@@ -34,7 +34,7 @@ routerCreateUser.post("/create", async (req, res) => {
     );
 
     //Return both responses combioned
-    res.json({ jwt: authResponse.data, profile: profileResponse.data });
+    res.json({ auth: authResponse.data, profile: profileResponse.data });
   } catch (err: any) {
     //If it fails during profile creation, roll back the user
     if (err.config.url.includes("/profile/create")) {

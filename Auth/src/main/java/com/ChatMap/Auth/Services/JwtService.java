@@ -1,5 +1,7 @@
 package com.ChatMap.Auth.Services;
 
+import java.time.Instant;
+import java.util.Calendar;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -19,14 +21,16 @@ public class JwtService {
 	private String secretKey;
 
 	@Value("${JWT_EXPIRATION}")
-	private int expirtaionMs;
+	private Long expirationMs;
 
 	public String generateJwtToken(Integer authenticatedId) {
 		String token = null;
+		Calendar time = Calendar.getInstance();
+		time.setTimeInMillis(time.getTimeInMillis()+expirationMs);
 		try {
 			Algorithm algorithm = Algorithm.HMAC256(secretKey);
 			token = JWT.create().withIssuer("ChatMapAuth").withSubject("" + authenticatedId)
-					.withExpiresAt(new Date(System.currentTimeMillis() + expirtaionMs)).sign(algorithm);
+					.withExpiresAt(time.getTime()).sign(algorithm);
 		} catch (JWTCreationException exception) {
 			System.out.println(exception);
 		}

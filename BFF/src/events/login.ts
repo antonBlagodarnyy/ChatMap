@@ -28,7 +28,7 @@ routerLogin.post("/login", async (req, res) => {
       }
     );
 
-    res.status(200).json({ auth: jwt, profile: profileResponse.data });
+    res.status(200).json({ auth: authResponse.data, profile: profileResponse.data });
   } catch (err: any) {
     const status = err.code == "ECONNREFUSED" ? 503 : err.response.status;
     const msg =

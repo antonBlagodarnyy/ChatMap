@@ -28,11 +28,11 @@ public class ProfileController {
 	@PostMapping("/create")
 	public @ResponseBody ResponseEntity<?> createProfile(@RequestBody CreateRequest createRequest) {
 		Profile profile = profileService.saveProfile(createRequest);
-		return ResponseEntity.ok(Map.of("Username", profile.getUsername()));
+		return ResponseEntity.ok(Map.of("username", profile.getUsername()));
 	}
 
 	@GetMapping("/username")
 	public @ResponseBody ResponseEntity<?> getUsername(@RequestHeader("Authorization") String authorizationHeader) {
-		return ResponseEntity.ok(Map.of("Username", profileService.getUsername(authorizationHeader)));
+		return ResponseEntity.ok(Map.of("username", profileService.getUsername(authorizationHeader)));
 	}
 }

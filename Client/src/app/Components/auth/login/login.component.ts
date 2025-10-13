@@ -28,11 +28,7 @@ export class LoginComponent {
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', Validators.required),
   });
-  ngOnInit(): void {
-    if (this.authService.user$.getValue()) {
-      this.router.navigate(['/location']);
-    }
-  }
+
   onSubmit() {
     if (!this.loginForm.invalid) {
       const form = this.loginForm.value;

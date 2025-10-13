@@ -36,11 +36,6 @@ export class SignupComponent {
     { validators: passwordMatch }
   );
 
-  ngOnInit(): void {
-    if (this.authService.user$.getValue()) {
-      this.router.navigate(['/location']);
-    }
-  }
 
   onSubmit() {
     if (!this.registerForm.invalid) {
