@@ -1,7 +1,7 @@
 package com.ChatMap.Auth.Services;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +26,6 @@ public class AuthService {
 	private PasswordEncoder passwordEncoder;
 
 	public String saveUser(SignupRequest signupRequest) {
-
 		if (userRepository.findByEmail(signupRequest.getEmail()) != null)
 			throw new EmailAlreadyExistsException();
 
@@ -40,8 +39,9 @@ public class AuthService {
 		return jwtService.generateJwtToken(user.getId());
 	}
 
-	public String loginUser(LoginRequest loginRequest) {
 
+	public String loginUser(LoginRequest loginRequest) {
+		System.out.println(loginRequest.getEmail());
 		User user = userRepository.findByEmail(loginRequest.getEmail());
 
 		if (user == null)
@@ -53,5 +53,10 @@ public class AuthService {
 
 		return jwtService.generateJwtToken(user.getId());
 
+	}
+
+	public void deleteUser(String jwt) {
+
+		userRepository.deleteById(jwtService.extractUserId(jwt));
 	}
 }

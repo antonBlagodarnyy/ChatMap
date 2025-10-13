@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 import org.springframework.web.bind.annotation.PostMapping;
+
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,8 +20,8 @@ import com.ChatMap.Auth.Dto.SignupRequest;
 
 import com.ChatMap.Auth.Services.AuthService;
 
-@Controller 
-@RequestMapping(path = "/auth") 
+@Controller
+@RequestMapping(path = "/auth")
 @RestController
 public class AuthController {
 
@@ -38,5 +40,12 @@ public class AuthController {
 		final String jwt = authService.loginUser(loginRequest);
 
 		return ResponseEntity.ok(Map.of("jwt", jwt));
+	}
+
+	@PostMapping(path = "/delete")
+	public @ResponseBody ResponseEntity<Void> deleteUser(@RequestHeader("Authorization") String authorizationHeader)
+			throws Exception {
+		authService.deleteUser(authorizationHeader);
+		return ResponseEntity.ok().build();
 	}
 }

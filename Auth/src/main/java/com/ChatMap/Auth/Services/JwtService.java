@@ -1,16 +1,16 @@
 package com.ChatMap.Auth.Services;
 
-import io.jsonwebtoken.Jwts;
-
-import io.jsonwebtoken.security.Keys;
+import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-
-import javax.crypto.SecretKey;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 
 @Service
 public class JwtService {
@@ -21,19 +21,45 @@ public class JwtService {
 	@Value("${JWT_EXPIRATION}")
 	private int expirtaionMs;
 
-
-	private SecretKey getSigningKey() {
-
-		return Keys.hmacShaKeyFor(secretKey.getBytes());
-	}
-
 	public String generateJwtToken(Integer authenticatedId) {
-		final String jwt = Jwts.builder().subject("" + authenticatedId).issuedAt(new Date())
-				.expiration(new Date((new Date()).getTime() + expirtaionMs)).signWith(getSigningKey()).compact();
+		String token = null;
+		try {
+			Algorithm algorithm = Algorithm.HMAC256(secretKey);
+			token = JWT.create().withIssuer("ChatMapAuth").withSubject("" + authenticatedId)
+					.withExpiresAt(new Date(System.currentTimeMillis() + expirtaionMs)).sign(algorithm);
+		} catch (JWTCreationException exception) {
+			System.out.println(exception);
+		}
 
-
-		return jwt;
+		return token;
 	}
 
+	public DecodedJWT decodeJwt(String token) {
+		DecodedJWT decodedJWT = null;
+
+		Algorithm algorithm = Algorithm.HMAC256(secretKey);
+		JWTVerifier verifier = JWT.require(algorithm)
+				// specify any specific claim validations
+				.withIssuer("ChatMapAuth")
+				// reusable verifier instance
+				.build();
+
+		decodedJWT = verifier.verify(token);
+
+		return decodedJWT;
+	}
+
+	public Integer extractUserId(String authorizationHeader) {
+		String jwt = null;
+		DecodedJWT decodedJwt = null;
+
+		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+			jwt = authorizationHeader.substring(7);
+			decodedJwt = this.decodeJwt(jwt);
+		}
+		String userId = decodedJwt.getSubject();
+
+		return Integer.valueOf(userId);
+	}
 
 }
