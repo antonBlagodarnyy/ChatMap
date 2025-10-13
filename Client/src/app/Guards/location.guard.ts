@@ -9,10 +9,10 @@ export const locationGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  const userId = authService.user$.getValue()?.userId;
+  const token = authService.user$.getValue()?.token;
 
-  if (userId) {
-    return locationService.getLocationById$(userId).pipe(
+  if (token) {
+    return locationService.currentUserLocation$().pipe(
       map((l) => {
         if (l) return true;
         else return router.createUrlTree(['/location']);

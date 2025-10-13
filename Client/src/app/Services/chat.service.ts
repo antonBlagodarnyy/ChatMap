@@ -8,9 +8,7 @@ import { IUser } from '../Interfaces/IUser';
 })
 export class ChatService {
   recipient: IUser | undefined;
-  subject:
-    | WebSocketSubject<{ from: number; to: number; text: string }>
-    | undefined;
+  subject: WebSocketSubject<{ to: number; text: string }> | undefined;
 
   constructor(private authService: AuthService) {}
 
@@ -27,11 +25,9 @@ export class ChatService {
   sendMsg(msg: string) {
     this.retrieveRecipient();
     if (this.subject) {
-      const currentUserId = this.authService.user$.getValue()?.userId;
-      if (currentUserId && this.recipient?.id) {
+      if (this.recipient?.id) {
         this.subject.subscribe();
         this.subject.next({
-          from: currentUserId,
           to: this.recipient.id,
           text: msg,
         });

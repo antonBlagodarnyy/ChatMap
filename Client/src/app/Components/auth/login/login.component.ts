@@ -25,7 +25,7 @@ import { MatButtonModule } from '@angular/material/button';
 export class LoginComponent {
   constructor(private authService: AuthService, private router: Router) {}
   loginForm = new FormGroup({
-    username: new FormControl('', [Validators.required]),
+    email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', Validators.required),
   });
   ngOnInit(): void {
@@ -36,8 +36,8 @@ export class LoginComponent {
   onSubmit() {
     if (!this.loginForm.invalid) {
       const form = this.loginForm.value;
-      if (form.username != null && form.password != null) {
-        this.authService.login$(form.username, form.password).subscribe({
+      if (form.email != null && form.password != null) {
+        this.authService.login$(form.email, form.password).subscribe({
           next: () => {
             this.router.navigate(['/map']);
           },

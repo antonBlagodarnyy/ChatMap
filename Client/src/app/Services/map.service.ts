@@ -26,7 +26,7 @@ export class MapService {
     return combineLatest([
       this.markerService.usersLayer$(),
       this.markerService.authUserLayer$(),
-      this.locationService.authUserLocation$(),
+      this.locationService.currentUserLocation$(),
     ]).pipe(
       map(([ul, al, aLocation]) => {
         const map = new Map({

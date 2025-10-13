@@ -36,7 +36,7 @@ export class MarkerService {
   usersMarkers$() {
     return combineLatest([
       this.locationService.getAllLocations$(),
-      this.locationService.authUserLocation$(),
+      this.locationService.currentUserLocation$(),
     ]).pipe(
       map(([allLocations, authLocation]) => {
         return allLocations
@@ -50,7 +50,7 @@ export class MarkerService {
     );
   }
   authUserMarker$() {
-    return this.locationService.authUserLocation$().pipe(
+    return this.locationService.currentUserLocation$().pipe(
       map((l) => {
         return this.userFeature(l, true);
       })

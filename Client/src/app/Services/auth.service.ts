@@ -4,6 +4,7 @@ import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
 import { BehaviorSubject, tap } from 'rxjs';
 import { IUserAuth } from '../Interfaces/IUserAuth';
+import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
   providedIn: 'root',
@@ -15,36 +16,22 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  login$(username: string, password: string) {
-    const authData = { username: username, password: password };
+  login$(email: string, password: string) {
+    const authData = { email: email, password: password };
     return this.http
       .post<{
-        jwt: string;
-        expires: string;
-        userId: number;
-        username: string;
-      }>(environment.apiUrl + 'users/login', authData, {
+        auth: string;
+        profile: { username: string };
+      }>(environment.apiUrl + 'user/login', authData, {
         withCredentials: true,
       })
       .pipe(
         tap((r) => {
-          const token = r.jwt;
-          const expirationDate = new Date(r.expires);
-          const userId = r.userId;
-          const userName = r.username;
+          console.log(r)
+          const token = r.auth;
 
-          if (token && expirationDate && userId) {
-            this.setAuthTimer(expirationDate);
-
-            this.user$.next({
-              token: token,
-              expirationDate: expirationDate,
-              userId: userId,
-              username: userName,
-            });
-
-            this.saveAuthData(token, expirationDate, userId, userName);
-          }
+          this.processUserData(token, r.profile.username);
+          this.router.navigate(['/map']);
         })
       );
   }
@@ -53,32 +40,14 @@ export class AuthService {
     const authData = { username: username, email: email, password: password };
     return this.http
       .post<{
-        jwt: string;
-        expires: string;
-        userId: number;
-        username: string;
-      }>(environment.apiUrl + 'users/signup', authData)
+        auth: { jwt: string };
+        profile: { username: string };
+      }>(environment.apiUrl + 'user/create', authData)
       .pipe(
         tap((r) => {
-          const token = r.jwt;
-          const expires = r.expires;
-          const userId = r.userId;
-          const userName = r.username;
-
-          if (token && expires && userId) {
-            const expirationDate = new Date(expires);
-            this.setAuthTimer(expirationDate);
-            this.user$.next({
-              token: token,
-              expirationDate: expirationDate,
-              userId: userId,
-              username: userName,
-            });
-
-            this.saveAuthData(token, expirationDate, userId, userName);
-
-            this.router.navigate(['/location']);
-          }
+          const token = r.auth.jwt;
+          this.processUserData(token, r.profile.username);
+          this.router.navigate(['/location']);
         })
       );
   }
@@ -87,6 +56,26 @@ export class AuthService {
     this.user$.next(null);
     this.clearAuthData();
   }
+  private processUserData(token: string, username: string) {
+    const authData = jwtDecode(token);
+
+    if (authData.exp && authData.sub) {
+      const expires = authData.exp;
+
+      const userName = username;
+
+      const expirationDate = new Date(expires);
+      this.setAuthTimer(expirationDate);
+      this.user$.next({
+        token: token,
+        expirationDate: expirationDate,
+        username: userName,
+      });
+
+      this.saveAuthData(token, expirationDate, userName);
+    }
+  }
+
   private clearAuthData() {
     localStorage.removeItem('token');
     localStorage.removeItem('expiration');
@@ -97,28 +86,20 @@ export class AuthService {
       this.clearUser();
     }, expires.getTime() - new Date().getTime());
   }
-  private saveAuthData(
-    token: string,
-    expirationDate: Date,
-    userId: number,
-    username: string
-  ) {
+  private saveAuthData(token: string, expirationDate: Date, username: string) {
     localStorage.setItem('token', token);
     localStorage.setItem('expiration', expirationDate.toISOString());
-    localStorage.setItem('userId', JSON.stringify(userId));
     localStorage.setItem('username', username);
   }
 
   private getAuthData(): IUserAuth | null {
     const token = localStorage.getItem('token');
     const expirationDateRaw = localStorage.getItem('expiration');
-    const userIdRaw = localStorage.getItem('userId');
     const username = localStorage.getItem('username');
 
-    if (!token || !expirationDateRaw || !userIdRaw || !username) {
+    if (!token || !expirationDateRaw || !username) {
       return null;
     }
-    const userId = JSON.parse(userIdRaw);
     const expirationDate = new Date(expirationDateRaw);
 
     this.setAuthTimer(expirationDate);
@@ -126,7 +107,6 @@ export class AuthService {
     return {
       token,
       expirationDate,
-      userId,
       username,
     };
   }

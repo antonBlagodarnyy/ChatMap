@@ -4,7 +4,7 @@ import { LocationService } from '../../Services/location.service';
 import { MatCard, MatCardModule } from '@angular/material/card';
 import { MatButton } from '@angular/material/button';
 import { Router } from '@angular/router';
-import {  switchMap } from 'rxjs';
+import { switchMap } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogSuccessComponent } from './dialog-success/dialog-success.component';
 import { ErrorComponent } from '../../Components/error/error.component';
@@ -51,30 +51,26 @@ export class LocationComponent {
   ) {}
 
   uploadLocation() {
-    const userId = this.authService.user$.getValue()?.userId;
-    if (userId) {
-      this.locationService
-        .askUserForLocation$()
-        .pipe(
-          switchMap((position) =>
-            this.locationService.postUsersLocation$(
-              userId,
-              position.coords.latitude,
-              position.coords.longitude
-            )
+    this.locationService
+      .askUserForLocation$()
+      .pipe(
+        switchMap((position) =>
+          this.locationService.postUsersLocation$(
+            position.coords.latitude,
+            position.coords.longitude
           )
         )
-        .subscribe({
-          next: () => {
-            this.dialogRef.open(DialogSuccessComponent, { disableClose: true });
-          },
-          error: () => {
-            this.dialogRef.open(ErrorComponent, {
-              data: { message: 'Something went wrong! Please try again.' },
-            });
-          },
-        });
-    }
+      )
+      .subscribe({
+        next: () => {
+          this.dialogRef.open(DialogSuccessComponent, { disableClose: true });
+        },
+        error: () => {
+          this.dialogRef.open(ErrorComponent, {
+            data: { message: 'Something went wrong! Please try again.' },
+          });
+        },
+      });
   }
 
   signout() {

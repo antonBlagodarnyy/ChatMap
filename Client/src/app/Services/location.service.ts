@@ -26,11 +26,10 @@ export class LocationService {
     );
   }
 
-  postUsersLocation$(userId: number, lat: number, lon: number) {
+  postUsersLocation$( lat: number, lon: number) {
     return this.http.post<IUserLocation>(
       environment.apiUrl + 'userslocations/post',
       {
-        id: userId,
         latitude: lat,
         longitude: lon,
       }
@@ -58,9 +57,10 @@ export class LocationService {
       environment.apiUrl + 'userslocations/byUser/' + id
     );
   }
-  authUserLocation$() {
-    const userId = this.authService.user$.getValue()?.userId;
-    if (userId) return this.getLocationById$(userId);
-    else return EMPTY;
+  currentUserLocation$() {
+   return this.http.get<IUserLocation>(
+      environment.apiUrl + 'userslocations/currentUser'
+    );
+  
   }
 }
