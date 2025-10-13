@@ -8,6 +8,6 @@ export function jwtCheck(req: Request, res: Response, next: NextFunction) {
   if (!token) return res.status(401).json({ message: "no token" });
 
   jwt.verify(token, process.env.JWT_KEY!);
-  console.log(token);
+
   next();
 }
