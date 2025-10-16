@@ -1,4 +1,3 @@
-// Use "type: module" in package.json to use ES modules
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -8,10 +7,15 @@ import routerCreateLocation from "./events/Location/createLocation.js";
 import routerCurrentLocation from "./events/Location/currentLocation.js";
 import routerNearbyLocation from "./events/Location/nearbyLocation.js";
 import routerUserData from "./events/User/userData.js";
+import http from "http";
+import { WebSocketServer } from "ws";
+import configWs from "./events/Chat/webSocketConnection.js";
 
 dotenv.config();
 const app = express();
-const port = 3000;
+const server = http.createServer();
+const wsPort = 3001;
+const restPort = 3000;
 app.use(express.json());
 app.use(
   cors({
@@ -21,6 +25,7 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(
   "/location",
   routerCreateLocation,
@@ -29,9 +34,15 @@ app.use(
 );
 app.use("/user", routerCreateUser, routerLogin, routerUserData);
 
-app.listen(port, () => {
-  console.log(`Api Gateway listening on port: ${port}`);
+const wss = new WebSocketServer({ server });
+
+configWs(wss);
+
+server.listen(wsPort, () => {
+  console.log(`ws listening on port: ${wsPort}`);
+});
+app.listen(restPort, () => {
+  console.log(`rest listening on port ${restPort}`);
 });
 
-// Export the Express app
-export default app;
+

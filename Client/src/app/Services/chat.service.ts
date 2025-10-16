@@ -3,19 +3,24 @@ import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { AuthService } from './auth.service';
 import { IUser } from '../Interfaces/IUser';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, EMPTY, map, switchMap } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { MatDialog } from '@angular/material/dialog';
+import { LoadingComponent } from '../Components/loading/loading.component';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ChatService {
-  subject: WebSocketSubject<{ to: number; text: string }> | undefined;
   private recipient = new BehaviorSubject<
     { id: number; username: string } | undefined
   >(undefined);
   recipient$ = this.recipient.asObservable();
 
-  constructor(private authService: AuthService) {}
+  spinnerRef: any;
+  spinnerTimeout: ReturnType<typeof setTimeout> | undefined;
+
+  constructor(private authService: AuthService, private dialogRef: MatDialog) {}
 
   setRecipient(id: number, username: string) {
     this.recipient.next({ id, username });
@@ -25,14 +30,33 @@ export class ChatService {
     return this.recipient$;
   }
 
-  connect() {
-    const token = this.authService.user$.value?.token;
-
-    if (token) {
-      this.subject = webSocket('ws://localhost:8081?token=' + token);
-      return this.subject;
-    }
-    return undefined;
+  openLoader() {
+    this.spinnerTimeout = setTimeout(() => {
+      this.spinnerRef = this.dialogRef.open(LoadingComponent, {
+        disableClose: true,
+      });
+    }, 300);
+  }
+  connect$() {
+    return combineLatest([this.recipient$, this.authService.user$]).pipe(
+      switchMap(([recipient, user]) => {
+        if (user) {
+          const subject = webSocket({
+            url: environment.wsUrl + '?token=' + user.token,
+            serializer: (msg) =>
+              JSON.stringify({ to: recipient?.id, msg: msg }),
+            openObserver: {
+              next: () => {
+                if(this.spinnerRef)
+                this.spinnerRef.close();
+                clearTimeout(this.spinnerTimeout);
+              },
+            },
+          });
+          return subject;
+        } else return EMPTY;
+      })
+    );
   }
 
   sendMsg(msg: string) {

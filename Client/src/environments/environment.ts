@@ -1,4 +1,5 @@
 export const environment = {
-    production:true,
-    apiUrl:'undefined',
+  production: true,
+  apiUrl: 'undefined',
+  wsUrl: 'undefined',
 };

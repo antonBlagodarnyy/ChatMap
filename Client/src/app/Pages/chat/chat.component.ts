@@ -16,7 +16,10 @@ import { LoadingComponent } from '../../Components/loading/loading.component';
   template: `
     <app-header />
     <div class="container">
-      <app-messages [recipientName]="this.receiverUsername" [messages]="messages.getValue()" /><app-input-box />
+      <app-messages
+        [recipientName]="this.receiverUsername"
+        [messages]="messages.getValue()"
+      /><app-input-box />
     </div>
   `,
   styles: `.container{
@@ -39,57 +42,24 @@ export class ChatComponent implements OnInit {
   receiverId!: number;
   messages = new BehaviorSubject<IMessage[] | undefined>(undefined);
 
-  constructor(private chatService: ChatService, private dialogRef: MatDialog) {}
+  constructor(private chatService: ChatService) {}
 
   ngOnInit(): void {
+    this.chatService.openLoader();
     this.chatService.getReceiver$().subscribe((r) => {
       if (r) {
         this.receiverUsername = r.username;
         this.receiverId = r.id;
       }
     });
-    let spinnerRef: any;
-    let spinnerTimeout: ReturnType<typeof setTimeout>;
 
-    // wait 300ms before showing spinner
-    spinnerTimeout = setTimeout(() => {
-      spinnerRef = this.dialogRef.open(LoadingComponent, {
-        disableClose: true,
-      });
-    }, 300);
-
-    //Tries to connect to the ws and gets the connection
-    const ws = this.chatService.connect();
-
-    //Combine the messages and the ws connection in to one
-    /*  const serverConnected = combineLatest({
-      ws: ws?.asObservable(),
-      msg: this.messages,
-    }); */
-
-    //Once both are established, close spinner
-    /*  serverConnected.subscribe((value) => {
-      if (value.ws && value.msg) {
-        clearTimeout(spinnerTimeout);
-        if (spinnerRef) spinnerRef.close();
-      } *
+    this.chatService.connect$().subscribe({
+      next: (msg) => {
+        console.log(msg);
+      },
+      error: (err) => {
+        console.log(err);
+      },
     });
-/
-    //Subscribe to new msgs
-    /* ws?.watch('/topic/messages').subscribe((message: Message) => {
-      const msg = JSON.parse(message.body);
-      if (this.messages)
-        this.messages.next([...(this.messages.getValue() ?? []), msg]);
-    }); */
-
-    //Get previous msgs
-    /*    this.chatService
-      .getMsgs()
-      .pipe(
-        retry({ delay: 3000 }) // retry up to 3 times before failing
-      )
-      .subscribe((messages) => {
-        this.messages.next(messages);
-      }); */
   }
 }
