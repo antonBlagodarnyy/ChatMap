@@ -47,15 +47,18 @@ import { ChatService } from '../../../../Services/chat.service';
 })
 export class InputBoxComponent {
   inputContent?: string;
-  constructor(private chatService: ChatService) {}
   matcher = new MyErrorStateMatcher();
+
+  constructor() {}
+
   onMsgSent() {
     if (this.inputContent) {
-      this.chatService.sendMsg(this.inputContent);
+      //this.chatService.sendMsg(this.inputContent);
       this.inputContent = '';
     }
   }
 }
+
 class MyErrorStateMatcher implements ErrorStateMatcher {
   isErrorState(
     control: AbstractControl | null,

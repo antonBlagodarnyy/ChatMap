@@ -1,22 +1,22 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, Signal, signal } from '@angular/core';
 import { ChatService } from '../../Services/chat.service';
 
 import { IMessage } from '../../Interfaces/IMessage';
-/* import { Message } from '@stomp/stompjs'; */
 import { MatDialog } from '@angular/material/dialog';
 
-import { BehaviorSubject, combineLatest } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { MessagesComponent } from '../../Components/chat/messages/messages.component';
 import { InputBoxComponent } from '../../Components/chat/messages/input-box/input-box.component';
-import { HeaderComponent } from "../../Components/map/header/header.component";
+import { HeaderComponent } from '../../Components/map/header/header.component';
+import { LoadingComponent } from '../../Components/loading/loading.component';
 
 @Component({
   selector: 'app-chat',
   imports: [MessagesComponent, InputBoxComponent, HeaderComponent],
   template: `
-  <app-header/>
+    <app-header />
     <div class="container">
-      <app-messages [messages]="messages.getValue()" /><app-input-box />
+      <app-messages [recipientName]="this.receiverUsername" [messages]="messages.getValue()" /><app-input-box />
     </div>
   `,
   styles: `.container{
@@ -34,12 +34,20 @@ import { HeaderComponent } from "../../Components/map/header/header.component";
     width:90%;
   }`,
 })
-export class ChatComponent /* implements OnInit */ {
+export class ChatComponent implements OnInit {
+  receiverUsername!: string;
+  receiverId!: number;
   messages = new BehaviorSubject<IMessage[] | undefined>(undefined);
 
   constructor(private chatService: ChatService, private dialogRef: MatDialog) {}
 
-/*   ngOnInit(): void {
+  ngOnInit(): void {
+    this.chatService.getReceiver$().subscribe((r) => {
+      if (r) {
+        this.receiverUsername = r.username;
+        this.receiverId = r.id;
+      }
+    });
     let spinnerRef: any;
     let spinnerTimeout: ReturnType<typeof setTimeout>;
 
@@ -50,40 +58,38 @@ export class ChatComponent /* implements OnInit */ {
       });
     }, 300);
 
-    this.chatService.getNickname();
-
     //Tries to connect to the ws and gets the connection
     const ws = this.chatService.connect();
 
     //Combine the messages and the ws connection in to one
-    const serverConnected = combineLatest({
-      ws: ws.connected$,
+    /*  const serverConnected = combineLatest({
+      ws: ws?.asObservable(),
       msg: this.messages,
-    });
+    }); */
 
     //Once both are established, close spinner
-    serverConnected.subscribe((value) => {
+    /*  serverConnected.subscribe((value) => {
       if (value.ws && value.msg) {
         clearTimeout(spinnerTimeout);
         if (spinnerRef) spinnerRef.close();
-      }
+      } *
     });
-
+/
     //Subscribe to new msgs
-    ws?.watch('/topic/messages').subscribe((message: Message) => {
+    /* ws?.watch('/topic/messages').subscribe((message: Message) => {
       const msg = JSON.parse(message.body);
       if (this.messages)
         this.messages.next([...(this.messages.getValue() ?? []), msg]);
-    });
+    }); */
 
     //Get previous msgs
-    this.chatService
+    /*    this.chatService
       .getMsgs()
       .pipe(
         retry({ delay: 3000 }) // retry up to 3 times before failing
       )
       .subscribe((messages) => {
         this.messages.next(messages);
-      });
-  } */
+      }); */
+  }
 }

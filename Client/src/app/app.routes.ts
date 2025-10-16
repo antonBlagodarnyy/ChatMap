@@ -34,7 +34,7 @@ export const routes: Routes = [
     canActivate: [NoAuthGuard, locationGuard],
   },
   {
-    path: 'chat',
+    path: 'chat/:userId',
     component: ChatComponent,
     canActivate: [NoAuthGuard, locationGuard],
   },

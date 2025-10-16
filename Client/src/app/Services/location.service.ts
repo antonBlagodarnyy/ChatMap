@@ -9,7 +9,7 @@ import { EMPTY, from } from 'rxjs';
   providedIn: 'root',
 })
 export class LocationService {
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(private http: HttpClient) {}
 
   async checkPermission() {
     const permissonStatus = await navigator.permissions.query({

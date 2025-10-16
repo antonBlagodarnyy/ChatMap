@@ -8,14 +8,12 @@ import {
 import { MessageComponent } from './message/message.component';
 import { NgFor } from '@angular/common';
 import { IMessage } from '../../../Interfaces/IMessage';
-import { HeaderComponent } from '../../map/header/header.component';
-import { MessagesHeaderComponent } from '../messages-header/messages-header.component';
 
 @Component({
   selector: 'app-messages',
-  imports: [NgFor, MessageComponent, MessagesHeaderComponent],
+  imports: [NgFor, MessageComponent],
   template: ` <div class="container-messages" #containerMessages>
-  <app-messages-header/>
+<h2>{{ recipientName() ? recipientName() : 'User unknown' }}</h2>
 
     <div *ngFor="let msg of messages()">
       <app-message [message]="msg"></app-message>
@@ -42,7 +40,10 @@ import { MessagesHeaderComponent } from '../messages-header/messages-header.comp
 export class MessagesComponent implements AfterViewChecked {
   @ViewChild('containerMessages')
   chatContainer!: ElementRef;
+
   messages = input<IMessage[] | undefined>();
+  recipientName= input<string>();
+
   ngAfterViewChecked(): void {
     this.chatContainer.nativeElement.scrollTop =
       this.chatContainer.nativeElement.scrollHeight;

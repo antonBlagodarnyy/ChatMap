@@ -19,7 +19,7 @@ routerLogin.post("/login", async (req, res) => {
     const jwt = authResponse.data.jwt;
 
     const profileResponse = await axios.get(
-      `${process.env.PROFILE_URL}/profile/username`,
+      `${process.env.PROFILE_URL}/profile/currentUsername`,
       {
         headers: {
           "Content-Type": "application/json",

@@ -2,15 +2,28 @@ import { Injectable } from '@angular/core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { AuthService } from './auth.service';
 import { IUser } from '../Interfaces/IUser';
+import { ActivatedRoute } from '@angular/router';
+import { BehaviorSubject, map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ChatService {
-  recipient: IUser | undefined;
   subject: WebSocketSubject<{ to: number; text: string }> | undefined;
+  private recipient = new BehaviorSubject<
+    { id: number; username: string } | undefined
+  >(undefined);
+  recipient$ = this.recipient.asObservable();
 
   constructor(private authService: AuthService) {}
+
+  setRecipient(id: number, username: string) {
+    this.recipient.next({ id, username });
+  }
+
+  getReceiver$() {
+    return this.recipient$;
+  }
 
   connect() {
     const token = this.authService.user$.value?.token;
@@ -23,25 +36,16 @@ export class ChatService {
   }
 
   sendMsg(msg: string) {
-    this.retrieveRecipient();
-    if (this.subject) {
-      if (this.recipient?.id) {
+    //TODO make a pipeline that combines the current User, the msg and the ws
+    /*  if (this.subject) {
+      if (recipientId) {
         this.subject.subscribe();
         this.subject.next({
-          to: this.recipient.id,
+          to: recipientId,
           text: msg,
         });
         this.subject.complete();
         this.subject.error({ code: 4000, reason: 'Smth broke' });
-      }
-    }
-  }
-
-  saveRecipient() {
-    localStorage.setItem('recipient', JSON.stringify(this.recipient));
-  }
-  retrieveRecipient() {
-    const recipientRaw = localStorage.getItem('recipient');
-    if (recipientRaw) this.recipient = JSON.parse(recipientRaw);
+      } */
   }
 }

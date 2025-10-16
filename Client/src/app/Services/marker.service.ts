@@ -7,7 +7,7 @@ import Icon from 'ol/style/Icon';
 import Style from 'ol/style/Style';
 import { LocationService } from './location.service';
 import { IUserLocation } from '../Interfaces/IUserLocation';
-import { combineLatest, map } from 'rxjs';
+import { map } from 'rxjs';
 import { fromLonLat } from 'ol/proj';
 
 @Injectable({

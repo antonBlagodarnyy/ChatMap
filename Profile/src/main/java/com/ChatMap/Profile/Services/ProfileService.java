@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.ChatMap.Profile.Dto.CreateRequest;
+import com.ChatMap.Profile.Dto.UserDataResponse;
 import com.ChatMap.Profile.Entities.Profile;
 import com.ChatMap.Profile.Repositories.ProfileRepository;
 
@@ -39,5 +40,15 @@ public class ProfileService {
 		Profile profile = profileOpt.get();
 
 		return profile.getUsername();
+	}
+
+	//TODO add more data to the profile
+	public UserDataResponse getUserData(Integer userId) {
+		Optional<Profile> profileOpt = profileRepository.findById(userId);
+
+		Profile profile = profileOpt.get();
+
+		UserDataResponse userDTO = new UserDataResponse(profile.getUsername());
+		return userDTO;
 	}
 }
