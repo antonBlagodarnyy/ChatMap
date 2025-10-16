@@ -26,9 +26,9 @@ export class LocationService {
     );
   }
 
-  postUsersLocation$( lat: number, lon: number) {
+  postUsersLocation$(lat: number, lon: number) {
     return this.http.post<IUserLocation>(
-      environment.apiUrl + 'userslocations/post',
+      environment.apiUrl + 'location/create',
       {
         latitude: lat,
         longitude: lon,
@@ -47,9 +47,9 @@ export class LocationService {
     );
   }
 
-  getAllLocations$() {
-    return this.http.get<IUserLocation[]>(
-      environment.apiUrl + 'userslocations/getAll'
+  getNearbyLocationsNotCurrent$() {
+    return this.http.get<{ locations: IUserLocation[] }>(
+      environment.apiUrl + 'location/nearbyNotCurrent/' + 100000000
     );
   }
   getLocationById$(id: number) {
@@ -58,9 +58,8 @@ export class LocationService {
     );
   }
   currentUserLocation$() {
-   return this.http.get<IUserLocation>(
-      environment.apiUrl + 'userslocations/currentUser'
+    return this.http.get<{ location: IUserLocation }>(
+      environment.apiUrl + 'location/current'
     );
-  
   }
 }

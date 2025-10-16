@@ -34,14 +34,17 @@ export class MapService {
             new TileLayer({
               source: new XYZ({
                 url: 'https://cartodb-basemaps-{a-d}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png',
-    attributions: '© OpenStreetMap contributors © CARTO',
+                attributions: '© OpenStreetMap contributors © CARTO',
               }),
             }),
             ul,
             al,
           ],
           view: new View({
-            center: fromLonLat([aLocation.longitude, aLocation.latitude]),
+            center: fromLonLat([
+              aLocation.location.longitude,
+              aLocation.location.latitude,
+            ]),
             zoom: 15,
           }),
           target: 'map',

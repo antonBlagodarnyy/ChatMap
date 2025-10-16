@@ -15,6 +15,8 @@ export class MapComponent implements OnInit {
   constructor(private mapService: MapService) {}
 
   ngOnInit() {
-    this.mapService.map$().subscribe((m) => (this.map = m));
+    this.mapService.map$().subscribe((m) => {
+      this.map = m;
+    });
   }
 }

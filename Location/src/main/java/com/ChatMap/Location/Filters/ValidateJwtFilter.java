@@ -26,18 +26,18 @@ public class ValidateJwtFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 
 		final String authorizationHeader = request.getHeader("Authorization");
-
 		String jwt = null;
 		DecodedJWT decodedJwt = null;
 
 		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
 			jwt = authorizationHeader.substring(7);
+			
 			decodedJwt = jwtService.decodeJwt(jwt);
 		}
 		String userId = decodedJwt.getSubject();
 
-		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userId, null,
-				List.of());
+		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+				Integer.parseInt(userId), null, List.of());
 
 		SecurityContextHolder.getContext().setAuthentication(authToken);
 		filterChain.doFilter(request, response);

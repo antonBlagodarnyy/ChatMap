@@ -40,14 +40,13 @@ public class ValidateJwtFilter extends OncePerRequestFilter {
 			if (userId == null)
 				throw new JWTVerificationException("No user in the jwt");
 
-			UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(Integer.parseInt(userId), null,
-					List.of());
+			UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+					Integer.parseInt(userId), null, List.of());
 
 			SecurityContextHolder.getContext().setAuthentication(authToken);
-		}	catch(Exception e) {
+		} catch (Exception e) {
 			System.out.println("JWT validation failed: " + e.getMessage());
 		}
-		
 
 		filterChain.doFilter(request, response);
 	}

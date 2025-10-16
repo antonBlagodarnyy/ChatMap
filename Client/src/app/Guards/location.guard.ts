@@ -14,7 +14,8 @@ export const locationGuard: CanActivateFn = (route, state) => {
   if (token) {
     return locationService.currentUserLocation$().pipe(
       map((l) => {
-        if (l) return true;
+
+        if (Object.keys(l).length != 0) return true;
         else return router.createUrlTree(['/location']);
       })
     );

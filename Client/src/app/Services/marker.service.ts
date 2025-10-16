@@ -7,7 +7,7 @@ import Icon from 'ol/style/Icon';
 import Style from 'ol/style/Style';
 import { LocationService } from './location.service';
 import { IUserLocation } from '../Interfaces/IUserLocation';
-import { combineLatest, map, } from 'rxjs';
+import { combineLatest, map } from 'rxjs';
 import { fromLonLat } from 'ol/proj';
 
 @Injectable({
@@ -16,6 +16,7 @@ import { fromLonLat } from 'ol/proj';
 export class MarkerService {
   constructor(private locationService: LocationService) {}
 
+  //Casts a IUserLocation into a feature object
   userFeature(userLocation: IUserLocation, authLocation: boolean) {
     const userFeature = new Feature({
       geometry: new Point(
@@ -33,51 +34,39 @@ export class MarkerService {
     return userFeature;
   }
 
-  usersMarkers$() {
-    return combineLatest([
-      this.locationService.getAllLocations$(),
-      this.locationService.currentUserLocation$(),
-    ]).pipe(
-      map(([allLocations, authLocation]) => {
-        return allLocations
-          .filter(
-            (l) =>
-              l.latitude != authLocation.latitude &&
-              l.longitude != authLocation.longitude
-          )
-          .map((l) => this.userFeature(l, false));
-      })
-    );
-  }
-  authUserMarker$() {
-    return this.locationService.currentUserLocation$().pipe(
-      map((l) => {
-        return this.userFeature(l, true);
-      })
-    );
-  }
-
+//First map converts the nearby locations in to features and the second in to a vector layer
   usersLayer$() {
-    return this.usersMarkers$().pipe(
-      map((markers) => {
+    return this.locationService.getNearbyLocationsNotCurrent$().pipe(
+      map((getNearbyLocationsRes) => {
+        return getNearbyLocationsRes.locations.map((l) => {
+          return this.userFeature(l, false);
+        });
+      }),
+      map((features) => {
         const vectorSource = new VectorSource({
-          features: markers,
+          features: features,
         });
         return new VectorLayer({ source: vectorSource });
       })
     );
   }
+
+  //First map converts the authenticated location in to a feature and the second in to a vector layer
   authUserLayer$() {
-    return this.authUserMarker$().pipe(
-      map((marker) => {
-        const vectorSource = new VectorSource({
-          features: [marker],
+    return this.locationService.currentUserLocation$().pipe(
+      map((currentUserLocationRes) => {
+        return this.userFeature(currentUserLocationRes.location, true);
+       
+      }),
+      map((features)=>{
+         const vectorSource = new VectorSource({
+          features: [features],
         });
         return new VectorLayer({
           source: vectorSource,
           properties: { name: 'authUserLayer' },
-        });
-      })
+        });})
+      
     );
   }
 }
