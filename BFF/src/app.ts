@@ -19,7 +19,7 @@ const restPort = 3000;
 app.use(express.json());
 app.use(
   cors({
-    origin: [process.env.CLIENT_URL!],
+    origin: [process.env.CLIENT_URL!, "http://localhost:54423"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -44,5 +44,3 @@ server.listen(wsPort, () => {
 app.listen(restPort, () => {
   console.log(`rest listening on port ${restPort}`);
 });
-
-

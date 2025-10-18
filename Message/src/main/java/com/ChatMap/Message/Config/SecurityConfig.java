@@ -1,4 +1,4 @@
-package com.ChatMap.Friend.Config;
+package com.ChatMap.Message.Config;
 
 
 import org.springframework.context.annotation.Bean;
@@ -8,7 +8,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.ChatMap.Friend.Filters.ValidateJwtFilter;
+import com.ChatMap.Message.Filters.ValidateJwtFilter;
 
 @Configuration
 @EnableWebSecurity

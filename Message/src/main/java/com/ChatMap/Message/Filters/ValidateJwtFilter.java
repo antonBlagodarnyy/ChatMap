@@ -1,4 +1,4 @@
-package com.ChatMap.Friend.Filters;
+package com.ChatMap.Message.Filters;
 
 import java.io.IOException;
 import java.util.List;
@@ -8,7 +8,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.ChatMap.Friend.Services.JwtService;
+import com.ChatMap.Message.Services.JwtService;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 import jakarta.servlet.FilterChain;

@@ -2,11 +2,12 @@ import { Injectable } from '@angular/core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { AuthService } from './auth.service';
 import { IUser } from '../Interfaces/IUser';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
 import { BehaviorSubject, combineLatest, EMPTY, map, switchMap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { MatDialog } from '@angular/material/dialog';
 import { LoadingComponent } from '../Components/loading/loading.component';
+import { UserService } from './user.service';
 
 @Injectable({
   providedIn: 'root',
@@ -20,8 +21,20 @@ export class ChatService {
   spinnerRef: any;
   spinnerTimeout: ReturnType<typeof setTimeout> | undefined;
 
-  constructor(private authService: AuthService, private dialogRef: MatDialog) {}
+  private wsSubject?: WebSocketSubject<any>;
 
+  constructor(
+    private authService: AuthService,
+    private dialogRef: MatDialog,
+    private userService: UserService
+  ) {}
+
+  updateRecipient(recipientId: number) {
+    if (recipientId)
+      this.userService
+        .getUserDataById$(+recipientId)
+        .subscribe((u) => this.setRecipient(+recipientId, u.username));
+  }
   setRecipient(id: number, username: string) {
     this.recipient.next({ id, username });
   }
@@ -38,38 +51,35 @@ export class ChatService {
     }, 300);
   }
   connect$() {
-    return combineLatest([this.recipient$, this.authService.user$]).pipe(
+    //Combines this recipient and current authenticated user
+    return combineLatest([this.recipient$, this.authService.getUser$()]).pipe(
+      //Switches to the ws
       switchMap(([recipient, user]) => {
+        //If a user is authenticated
         if (user) {
-          const subject = webSocket({
+          this.wsSubject = webSocket({
+            //Gets the ws url
             url: environment.wsUrl + '?token=' + user.token,
-            serializer: (msg) =>
-              JSON.stringify({ to: recipient?.id, msg: msg }),
+            //How to process outgoing messages
+            serializer: (res) => {
+              return JSON.stringify({ to: recipient?.id, msg: res });
+            },
+            
+            //What to do once the connection is opened
             openObserver: {
               next: () => {
-                if(this.spinnerRef)
-                this.spinnerRef.close();
+                if (this.spinnerRef) this.spinnerRef.close();
                 clearTimeout(this.spinnerTimeout);
               },
             },
           });
-          return subject;
+          return this.wsSubject;
         } else return EMPTY;
       })
     );
   }
 
   sendMsg(msg: string) {
-    //TODO make a pipeline that combines the current User, the msg and the ws
-    /*  if (this.subject) {
-      if (recipientId) {
-        this.subject.subscribe();
-        this.subject.next({
-          to: recipientId,
-          text: msg,
-        });
-        this.subject.complete();
-        this.subject.error({ code: 4000, reason: 'Smth broke' });
-      } */
+    if (this.wsSubject) this.wsSubject.next(msg);
   }
 }

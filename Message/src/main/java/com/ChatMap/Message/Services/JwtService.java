@@ -1,4 +1,4 @@
-package com.ChatMap.Friend.Services;
+package com.ChatMap.Message.Services;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

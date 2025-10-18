@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, output } from '@angular/core';
 import {
   AbstractControl,
   FormGroupDirective,
@@ -46,14 +46,15 @@ import { ChatService } from '../../../../Services/chat.service';
   }`,
 })
 export class InputBoxComponent {
-  inputContent?: string;
   matcher = new MyErrorStateMatcher();
+  inputContent?: string;
+  sendMsgEvent = output<string>();
 
   constructor() {}
 
   onMsgSent() {
     if (this.inputContent) {
-      //this.chatService.sendMsg(this.inputContent);
+      this.sendMsgEvent.emit(this.inputContent);
       this.inputContent = '';
     }
   }

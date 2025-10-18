@@ -7,7 +7,6 @@ const configWs = (wss: WebSocketServer) => {
   const clients = new Map<number, WebSocket>();
 
   wss.on("connection", function connection(ws, req) {
-    
     const token = req.url?.split("token=")[1];
 
     if (!token) {
@@ -41,9 +40,9 @@ const configWs = (wss: WebSocketServer) => {
 
         const senderId: number = (ws as any).user.sub;
 
-        const { from, to, text } = parsed;
+        const { to, msg } = parsed;
 
-        console.log(`Message from ${senderId} to ${to}: ${text}`);
+        console.log(`Message from ${senderId} to ${to}: ${msg}`);
 
         const recipientWs = clients.get(to);
 
@@ -56,7 +55,7 @@ const configWs = (wss: WebSocketServer) => {
             JSON.stringify({
               from: senderId,
               to: to,
-              text: text,
+              msg: msg,
             })
           );
         } else {

@@ -1,4 +1,4 @@
-package com.ChatMap.Friend.Config;
+package com.ChatMap.Message.Config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

@@ -5,7 +5,7 @@ import {
   HttpHandler,
   HttpRequest,
 } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, switchMap, take } from 'rxjs';
 import { AuthService } from '../Services/auth.service';
 
 @Injectable()
@@ -16,18 +16,22 @@ export class AuthInterceptor implements HttpInterceptor {
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    var authToken;
-    this.authService.user$.subscribe((u) => {
-      authToken = u?.token;
-    });
+    return this.authService.user$.pipe(
+      take(1), // Toma el último valor del observable y completa
+      switchMap((user) => {
+        const authToken = user?.token;
 
-    if (authToken) {
-      const authRequest = req.clone({
-        headers: req.headers.set('Authorization', 'Bearer ' + authToken),
-      });
-      return next.handle(authRequest);
-    } else {
-      return next.handle(req); // If no token, continue with the request without modifying headers
-    }
+        if (authToken) {
+          const authRequest = req.clone({
+            setHeaders: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          });
+          return next.handle(authRequest);
+        } else {
+          return next.handle(req);
+        }
+      })
+    );
   }
 }

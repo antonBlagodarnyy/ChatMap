@@ -1,10 +1,10 @@
-package com.ChatMap.Friend;
+package com.ChatMap.Message;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class FriendApplicationTests {
+class MessageApplicationTests {
 
 	@Test
 	void contextLoads() {

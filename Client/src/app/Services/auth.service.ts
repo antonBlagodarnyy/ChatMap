@@ -16,6 +16,12 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) {}
 
+  setUser(user: IUserAuth) {
+    this.userSub$.next(user);
+  }
+  getUser$() {
+    return this.user$;
+  }
   login$(email: string, password: string) {
     const authData = { email: email, password: password };
     return this.http

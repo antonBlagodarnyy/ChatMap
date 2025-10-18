@@ -32,7 +32,6 @@ export class UserInfoComponent implements OnInit {
     private dialogRef: MatDialogRef<UserInfoComponent>,
     private userService: UserService,
     private router: Router,
-    private chatService: ChatService
   ) {}
 
   ngOnInit(): void {
@@ -45,10 +44,6 @@ export class UserInfoComponent implements OnInit {
 
   openChat() {
     if (this.user) {
-      this.chatService.setRecipient(
-        this.data.featureData.id,
-        this.user.username
-      );
       this.dialogRef.close();
       this.router.navigate(['/chat', this.data.featureData.id]);
     }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, output, Output } from '@angular/core';
 import { AuthService } from '../../../Services/auth.service';
 import { IUserAuth } from '../../../Interfaces/IUserAuth';
 import { MatButtonModule } from '@angular/material/button';
@@ -28,10 +28,11 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 })
 export class HeaderComponent implements OnInit {
   protected user?: IUserAuth | null;
-
+  currentUsername = output<string>();
   constructor(private authService: AuthService, private router: Router) {}
   ngOnInit(): void {
     this.authService.user$.subscribe((user) => (this.user = user));
+    this.currentUsername.emit(this.user?.username ?? 'unknown');
   }
   logout() {
     this.authService.clearUser();
