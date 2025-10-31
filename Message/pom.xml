@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.ChatMap</groupId>
-	<artifactId>Friend</artifactId>
+	<artifactId>Message</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Friend</name>
-	<description>Friend microservice</description>
+	<description>Message microservice</description>
 	<url/>
 	<licenses>
 		<license/>

@@ -1,5 +1,6 @@
 package com.ChatMap.Profile.Controllers;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,10 +36,16 @@ public class ProfileController {
 	public @ResponseBody ResponseEntity<?> getCurrentUsername() {
 		return ResponseEntity.ok(Map.of("username", profileService.getUsername()));
 	}
-	
+
 	@GetMapping("/userData")
 	public @ResponseBody ResponseEntity<?> getuserData(@RequestParam Integer userId) {
-		//TODO add friend restriction
+		// TODO add friend restriction
 		return ResponseEntity.ok(Map.of("userData", profileService.getUserData(userId)));
+	}
+
+	@GetMapping("/usernamesById")
+	public @ResponseBody ResponseEntity<?> getMultipleUsernames(@RequestParam List<Integer> usersIds) {
+
+		return ResponseEntity.ok(profileService.getMultipleUsernames(usersIds));
 	}
 }

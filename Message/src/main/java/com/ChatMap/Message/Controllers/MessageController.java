@@ -1,0 +1,36 @@
+package com.ChatMap.Message.Controllers;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.ChatMap.Message.Dto.SaveMessageRequest;
+import com.ChatMap.Message.Services.MessageService;
+
+@Controller
+@RequestMapping(path = "/message")
+@RestController
+public class MessageController {
+
+	@Autowired
+	private MessageService messageService;
+
+	@PostMapping("/save")
+	public @ResponseBody ResponseEntity<?> saveMessage(@RequestBody SaveMessageRequest saveMessageRequest) {
+		messageService.saveMessage(saveMessageRequest);
+		return ResponseEntity.ok().build();
+	}
+
+	@GetMapping("/retrieve")
+	public @ResponseBody ResponseEntity<?> retrieveMessages(@RequestParam Integer receiver) {
+		return ResponseEntity.ok(messageService.retrieveMessages(receiver));
+
+	}
+}

@@ -13,7 +13,7 @@ import { ActivatedRoute } from '@angular/router';
     <app-header (currentUsername)="setCurrentUsername($event)" />
     <div class="container">
       <app-messages
-        [recipientName]="this.receiverUsername"
+        [recipientName]="this.recipientUsername"
         [messages]="messages()"
       /><app-input-box (sendMsgEvent)="sendMsg($event)" />
     </div>
@@ -34,7 +34,7 @@ import { ActivatedRoute } from '@angular/router';
   }`,
 })
 export class ChatComponent implements OnInit {
-  receiverUsername!: string;
+  recipientUsername!: string;
   senderUsername!: string;
   messages = signal<IMessage[] | undefined>(undefined);
 
@@ -51,18 +51,23 @@ export class ChatComponent implements OnInit {
 
     this.chatService.openLoader();
 
-    this.chatService.getReceiver$().subscribe((r) => {
+    this.chatService.getRecipient$().subscribe((r) => {
       if (r) {
-        this.receiverUsername = r.username;
+        this.recipientUsername = r.username;
       }
     });
+
+
+    this.chatService.retrieveMessages$().subscribe((res)=>
+    this.messages.set(res.locations)
+    )
 
     this.chatService.connect$().subscribe((msg) => {
       //On message received update the messages
       this.messages.update((oldMessages) => {
         return oldMessages
-          ? [...oldMessages, { sender: this.receiverUsername, text: msg.msg }]
-          : [{ sender: this.receiverUsername, text: msg.msg }];
+          ? [...oldMessages, { sender: this.recipientUsername, text: msg.msg }]
+          : [{ sender: this.recipientUsername, text: msg.msg }];
       });
     });
   }

@@ -6,7 +6,7 @@ const routerUserData = express.Router({ mergeParams: true });
 
 //TODO store and retrieve more data than the username
 routerUserData.get("/data/:userId", jwtCheck, async (req, res) => {
-  console.log("HIT");
+
   const token = req.header("Authorization");
   //TODO return res when there is no jwt
   if (token)

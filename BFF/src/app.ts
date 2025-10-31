@@ -10,16 +10,18 @@ import routerUserData from "./events/User/userData.js";
 import http from "http";
 import { WebSocketServer } from "ws";
 import configWs from "./events/Chat/webSocketConnection.js";
+import routeMessagesRetrieve from "./events/Chat/retrieveMessages.js";
 
+//General config
 dotenv.config();
 const app = express();
-const server = http.createServer();
-const wsPort = 3001;
+
+//Rest config
 const restPort = 3000;
 app.use(express.json());
 app.use(
   cors({
-    origin: [process.env.CLIENT_URL!, "http://localhost:54423"],
+    origin: [process.env.CLIENT_URL!, "http://localhost:61106"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -34,10 +36,16 @@ app.use(
 );
 app.use("/user", routerCreateUser, routerLogin, routerUserData);
 
+app.use("/message", routeMessagesRetrieve);
+
+//Ws config
+const server = http.createServer();
+const wsPort = 3001;
 const wss = new WebSocketServer({ server });
 
 configWs(wss);
 
+//Run endpoints
 server.listen(wsPort, () => {
   console.log(`ws listening on port: ${wsPort}`);
 });

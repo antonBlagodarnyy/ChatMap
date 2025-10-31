@@ -1,6 +1,7 @@
 import { WebSocketServer, WebSocket } from "ws";
-import type { IMessage } from "../../Interfaces/IMessage.js";
+import type { IResponseMessage } from "../../Interfaces/IResponseMessage.js";
 import jwt from "jsonwebtoken";
+import axios from "axios";
 
 const configWs = (wss: WebSocketServer) => {
   // Maps user IDs (sub from JWT) to WebSocket connections
@@ -18,7 +19,7 @@ const configWs = (wss: WebSocketServer) => {
     let decoded: any;
 
     try {
-      //TODO store token secret in .env
+
       decoded = jwt.verify(token, process.env.JWT_KEY!);
       console.log("Authenticated user:", decoded.sub);
 
@@ -36,7 +37,7 @@ const configWs = (wss: WebSocketServer) => {
     // Handle incoming messages
     ws.on("message", function message(data) {
       try {
-        const parsed: IMessage = JSON.parse(data.toString());
+        const parsed: IResponseMessage = JSON.parse(data.toString());
 
         const senderId: number = (ws as any).user.sub;
 
@@ -46,14 +47,22 @@ const configWs = (wss: WebSocketServer) => {
 
         const recipientWs = clients.get(to);
 
-        //TODO push new message to the db
-        //insertMessage(text, senderId, to);
+        //Post message to db
+        axios.post(
+          `${process.env.MESSAGE_URL}/message/save`,
+          { receiver: to, text: msg },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token,
+            },
+          }
+        );
 
         //Send the msg
         if (recipientWs && recipientWs.readyState === WebSocket.OPEN) {
           recipientWs.send(
             JSON.stringify({
-              from: senderId,
               to: to,
               msg: msg,
             })

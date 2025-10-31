@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.ChatMap.Message.Services.JwtService;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 import jakarta.servlet.FilterChain;
@@ -36,8 +37,11 @@ public class ValidateJwtFilter extends OncePerRequestFilter {
 		}
 		String userId = decodedJwt.getSubject();
 
-		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userId, null,
-				List.of());
+		if (userId == null)
+			throw new JWTVerificationException("No user in the jwt");
+
+		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+				Integer.parseInt(userId), null, List.of());
 
 		SecurityContextHolder.getContext().setAuthentication(authToken);
 		filterChain.doFilter(request, response);

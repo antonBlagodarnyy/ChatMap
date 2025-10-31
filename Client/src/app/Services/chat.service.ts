@@ -3,11 +3,22 @@ import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { AuthService } from './auth.service';
 import { IUser } from '../Interfaces/IUser';
 import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
-import { BehaviorSubject, combineLatest, EMPTY, map, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  concatMap,
+  EMPTY,
+  filter,
+  map,
+  mergeMap,
+  pairwise,
+  switchMap,
+} from 'rxjs';
 import { environment } from '../../environments/environment';
 import { MatDialog } from '@angular/material/dialog';
 import { LoadingComponent } from '../Components/loading/loading.component';
 import { UserService } from './user.service';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
@@ -26,7 +37,8 @@ export class ChatService {
   constructor(
     private authService: AuthService,
     private dialogRef: MatDialog,
-    private userService: UserService
+    private userService: UserService,
+    private http: HttpClient
   ) {}
 
   updateRecipient(recipientId: number) {
@@ -39,7 +51,7 @@ export class ChatService {
     this.recipient.next({ id, username });
   }
 
-  getReceiver$() {
+  getRecipient$() {
     return this.recipient$;
   }
 
@@ -52,7 +64,10 @@ export class ChatService {
   }
   connect$() {
     //Combines this recipient and current authenticated user
-    return combineLatest([this.recipient$, this.authService.getUser$()]).pipe(
+    return combineLatest([
+      this.getRecipient$(),
+      this.authService.getUser$(),
+    ]).pipe(
       //Switches to the ws
       switchMap(([recipient, user]) => {
         //If a user is authenticated
@@ -64,7 +79,7 @@ export class ChatService {
             serializer: (res) => {
               return JSON.stringify({ to: recipient?.id, msg: res });
             },
-            
+
             //What to do once the connection is opened
             openObserver: {
               next: () => {
@@ -81,5 +96,15 @@ export class ChatService {
 
   sendMsg(msg: string) {
     if (this.wsSubject) this.wsSubject.next(msg);
+  }
+
+  retrieveMessages$() {
+    return this.getRecipient$().pipe(
+      filter(Boolean),
+      switchMap((r) => {
+        console.log(r);
+        return this.http.get<{locations:[]}>(environment.apiUrl + 'message/retrieve/' + r?.id);
+      })
+    );
   }
 }
