@@ -7,7 +7,8 @@ import { MapService } from '../../Services/map.service';
 @Component({
   selector: 'app-map',
   imports: [HeaderComponent, MatIconModule],
-  templateUrl: './map.component.html',
+  template: `<app-header></app-header>
+    <div id="map" style="width: 100%; height: 85%"></div>`,
 })
 export class MapComponent implements OnInit {
   map?: Map;

@@ -47,9 +47,9 @@ export class LocationService {
     );
   }
 
-  getNearbyLocationsNotCurrent$() {
+  getNearbyLocationsNotCurrent$(lat: number, lon: number, radius: number) {
     return this.http.get<{ locations: IUserLocation[] }>(
-      environment.apiUrl + 'location/nearbyNotCurrent/' + 100000000
+      `${environment.apiUrl}location/nearbyNotCurrent/${lat}/${lon}/${radius}`
     );
   }
   getLocationById$(id: number) {

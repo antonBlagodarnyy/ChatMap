@@ -34,21 +34,24 @@ export class MarkerService {
     return userFeature;
   }
 
-//First map converts the nearby locations in to features and the second in to a vector layer
-  usersLayer$() {
-    return this.locationService.getNearbyLocationsNotCurrent$().pipe(
-      map((getNearbyLocationsRes) => {
-        return getNearbyLocationsRes.locations.map((l) => {
-          return this.userFeature(l, false);
-        });
-      }),
-      map((features) => {
-        const vectorSource = new VectorSource({
-          features: features,
-        });
-        return new VectorLayer({ source: vectorSource });
-      })
-    );
+  //First map converts the nearby locations in to features and the second in to a vector layer
+  usersLayer$(lat: number, lon: number, radius: number) {
+    return this.locationService
+      .getNearbyLocationsNotCurrent$(lat, lon, radius)
+      .pipe(
+        map((getNearbyLocationsRes) => {
+          return getNearbyLocationsRes.locations.map((l) => {
+            return this.userFeature(l, false);
+          });
+        }),
+        map((features) => {
+          const vectorSource = new VectorSource({
+            features: features,
+          });
+          return new VectorLayer({ source: vectorSource,
+          properties: { name: 'usersLayer' }, });
+        })
+      );
   }
 
   //First map converts the authenticated location in to a feature and the second in to a vector layer
@@ -56,17 +59,16 @@ export class MarkerService {
     return this.locationService.currentUserLocation$().pipe(
       map((currentUserLocationRes) => {
         return this.userFeature(currentUserLocationRes.location, true);
-       
       }),
-      map((features)=>{
-         const vectorSource = new VectorSource({
+      map((features) => {
+        const vectorSource = new VectorSource({
           features: [features],
         });
         return new VectorLayer({
           source: vectorSource,
           properties: { name: 'authUserLayer' },
-        });})
-      
+        });
+      })
     );
   }
 }

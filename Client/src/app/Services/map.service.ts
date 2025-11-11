@@ -1,16 +1,18 @@
 import { Injectable } from '@angular/core';
 import { MarkerService } from './marker.service';
 import TileLayer from 'ol/layer/Tile';
-import { combineLatest, map } from 'rxjs';
+import { combineLatest, fromEventPattern, map, switchMap } from 'rxjs';
 import OSM from 'ol/source/OSM';
 import View from 'ol/View';
 import Map from 'ol/Map';
 import { MatDialog } from '@angular/material/dialog';
 import { UserInfoComponent } from '../Components/map/user-info/user-info.component';
 import { LocationService } from './location.service';
-import { fromLonLat } from 'ol/proj';
+import { fromLonLat, toLonLat } from 'ol/proj';
 import Layer from 'ol/layer/Layer';
 import XYZ from 'ol/source/XYZ';
+import { Coordinate } from 'ol/coordinate';
+import { getDistance } from 'ol/sphere';
 
 @Injectable({
   providedIn: 'root',
@@ -24,11 +26,10 @@ export class MapService {
 
   map$() {
     return combineLatest([
-      this.markerService.usersLayer$(),
       this.markerService.authUserLayer$(),
       this.locationService.currentUserLocation$(),
     ]).pipe(
-      map(([ul, al, aLocation]) => {
+      map(([al, aLocation]) => {
         const map = new Map({
           layers: [
             new TileLayer({
@@ -37,7 +38,6 @@ export class MapService {
                 attributions: '© OpenStreetMap contributors © CARTO',
               }),
             }),
-            ul,
             al,
           ],
           view: new View({
@@ -58,7 +58,6 @@ export class MapService {
           map.getTargetElement().style.cursor = hit ? 'pointer' : '';
         });
 
-        // display popup on click
         map.on('click', (evt) => {
           var feature = map.forEachFeatureAtPixel(
             evt.pixel,
@@ -79,6 +78,26 @@ export class MapService {
           });
         });
 
+        fromEventPattern(
+          (handler) => map.on('moveend', handler),
+          (handler) => map.un('moveend', handler)
+        )
+          .pipe(
+            switchMap(() => {
+              const radius = this.getRadius(map);
+              const [lon, lat] = toLonLat(map.getView().getCenter()!);
+              return this.markerService.usersLayer$(lat, lon, radius);
+            })
+          )
+          .subscribe((ul) => {
+            
+            // Remove old user layers, then add new one
+            map.getLayers().forEach((l) => {
+              if (l.get('name') === 'usersLayer') map.removeLayer(l);
+            });
+            map.addLayer(ul);
+          });
+
         return map;
       })
     );
@@ -86,4 +105,26 @@ export class MapService {
   private layerFilter = (l: Layer) => {
     return l.get('name') != 'authUserLayer';
   };
+  private getRadius(map: Map): number {
+    const view = map.getView();
+    const extent = view.calculateExtent(map.getSize());
+    const bottomLeft = toLonLat([extent[0], extent[1]]);
+    const topRight = toLonLat([extent[2], extent[3]]);
+    const R = 6371000; // Earth's radius in meters
+
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
+
+    const dLat = toRad(topRight[1] - bottomLeft[1]);
+    const dLon = toRad(topRight[0] - bottomLeft[0]);
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(bottomLeft[1])) *
+        Math.cos(toRad(topRight[1])) *
+        Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+
+    // Return half the diagonal of the visible area as radius
+    return distance / 2;
+  }
 }

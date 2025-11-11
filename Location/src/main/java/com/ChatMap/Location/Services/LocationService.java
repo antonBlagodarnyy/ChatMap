@@ -37,13 +37,12 @@ public class LocationService {
 		return null;
 	}
 
-	public List<Location> getNearbyLocationsNotCurrent(Double radius) {
-		Location currentLocation = this.getCurrentLocation();
+	public List<Location> getNearbyLocationsNotCurrent(Double lat, Double lon, Double radius) {
 		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 		if (principal instanceof Integer id)
-			return locationRepository.findNearbyLocationsNotCurrent(currentLocation.getLatitude(),
-					currentLocation.getLongitude(), radius, id);
+			return locationRepository.findNearbyLocationsNotCurrent(lat,
+					lon, radius, id);
 		else
 			return null;
 	}

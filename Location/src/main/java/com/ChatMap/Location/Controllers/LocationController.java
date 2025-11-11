@@ -44,8 +44,8 @@ public class LocationController {
 	}
 
 	@GetMapping("/nearbyNotCurrent")
-	public @ResponseBody ResponseEntity<?> getNearbyLocation(@RequestParam Double radius) {
-		List<Location> locations = locationService.getNearbyLocationsNotCurrent(radius);
+	public @ResponseBody ResponseEntity<?> getNearbyLocation(@RequestParam Double lat, @RequestParam Double lon, @RequestParam Double radius) {
+		List<Location> locations = locationService.getNearbyLocationsNotCurrent(lat,lon, radius);
 		return ResponseEntity.ok(Map.of("locations", locations));
 	}
 

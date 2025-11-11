@@ -4,7 +4,7 @@ import { jwtCheck } from "../../middleware/JwtCheck.js";
 
 const routerNearbyLocation = express.Router({ mergeParams: true });
 
-routerNearbyLocation.get("/nearbyNotCurrent/:radius", jwtCheck, async (req, res) => {
+routerNearbyLocation.get("/nearbyNotCurrent/:lat/:lon/:radius", jwtCheck, async (req, res) => {
   const token = req.header("Authorization");
 
   if (token)
@@ -18,6 +18,8 @@ routerNearbyLocation.get("/nearbyNotCurrent/:radius", jwtCheck, async (req, res)
             Authorization: token,
           },
           params: {
+            lat: req.params.lat,
+            lon: req.params.lon,
             radius: req.params.radius,
           },
         }
