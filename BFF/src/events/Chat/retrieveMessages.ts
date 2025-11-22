@@ -27,8 +27,6 @@ routeMessagesRetrieve.get("/retrieve/:receiver", jwtCheck, async (req, res) => {
         ...new Set(routeMessagesRetrieveRes.data.map((item) => item.sender)),
       ];
 
-      console.log(usersIds)
-
       var locations = routeMessagesRetrieveRes.data;
 
       if(usersIds.length!=0){

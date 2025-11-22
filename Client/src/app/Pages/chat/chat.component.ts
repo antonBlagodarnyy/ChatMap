@@ -19,7 +19,7 @@ import { ActivatedRoute } from '@angular/router';
     </div>
   `,
   styles: `.container{
-    height:100%;
+    height:80%;
     display:flex;
     flex-direction:column;
     justify-content:center;
