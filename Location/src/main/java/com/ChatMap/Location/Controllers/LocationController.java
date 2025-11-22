@@ -27,6 +27,12 @@ public class LocationController {
 	LocationService locationService;
 
 	// TODO handle exceptios
+	@GetMapping("/health")
+	public @ResponseBody ResponseEntity<?> health() {
+		return ResponseEntity.ok().build();
+	}
+
+	
 	@PostMapping("/create")
 	public @ResponseBody ResponseEntity<?> createLocation(@RequestBody CreateLocationRequest createLocationRequest) {
 		locationService.createLocation(createLocationRequest);

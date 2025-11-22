@@ -25,11 +25,13 @@ export class MapService {
   ) {}
 
   map$() {
+    //Combines the values from the current user layer and location 
     return combineLatest([
       this.markerService.authUserLayer$(),
       this.locationService.currentUserLocation$(),
     ]).pipe(
       map(([al, aLocation]) => {
+        //Creates the map
         const map = new Map({
           layers: [
             new TileLayer({
@@ -50,7 +52,7 @@ export class MapService {
           target: 'map',
         });
 
-        // change mouse cursor when over marker
+        //Adds an event to change mouse cursor when over marker
         map.on('pointermove', (e) => {
           const hit = map.hasFeatureAtPixel(e.pixel, {
             layerFilter: this.layerFilter,
@@ -58,6 +60,7 @@ export class MapService {
           map.getTargetElement().style.cursor = hit ? 'pointer' : '';
         });
 
+        //Adds an event to open the users dialog
         map.on('click', (evt) => {
           var feature = map.forEachFeatureAtPixel(
             evt.pixel,
@@ -78,6 +81,7 @@ export class MapService {
           });
         });
 
+        //Creates an observable from an event that emits everytime the emit is triggered
         fromEventPattern(
           (handler) => map.on('moveend', handler),
           (handler) => map.un('moveend', handler)

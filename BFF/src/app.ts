@@ -11,6 +11,7 @@ import http from "http";
 import { WebSocketServer } from "ws";
 import configWs from "./events/Chat/webSocketConnection.js";
 import routeMessagesRetrieve from "./events/Chat/retrieveMessages.js";
+import routerHealth from "./events/Health/healthCheck.js";
 
 //General config
 dotenv.config();
@@ -21,7 +22,7 @@ const restPort = 3000;
 app.use(express.json());
 app.use(
   cors({
-    origin: [process.env.CLIENT_URL!, "http://localhost:61106"],
+    origin: [process.env.CLIENT_URL!],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -37,6 +38,8 @@ app.use(
 app.use("/user", routerCreateUser, routerLogin, routerUserData);
 
 app.use("/message", routeMessagesRetrieve);
+
+app.use("/health", routerHealth);
 
 //Ws config
 const server = http.createServer();

@@ -22,6 +22,13 @@ public class MessageController {
 	@Autowired
 	private MessageService messageService;
 
+	
+	@GetMapping("/health")
+	public @ResponseBody ResponseEntity<?> health() {
+		return ResponseEntity.ok().build();
+	}
+
+	
 	@PostMapping("/save")
 	public @ResponseBody ResponseEntity<?> saveMessage(@RequestBody SaveMessageRequest saveMessageRequest) {
 		messageService.saveMessage(saveMessageRequest);

@@ -26,6 +26,7 @@ public class ProfileController {
 	@Autowired
 	ProfileService profileService;
 
+	
 	@PostMapping("/create")
 	public @ResponseBody ResponseEntity<?> createProfile(@RequestBody CreateRequest createRequest) {
 		Profile profile = profileService.saveProfile(createRequest);
@@ -34,6 +35,7 @@ public class ProfileController {
 
 	@GetMapping("/currentUsername")
 	public @ResponseBody ResponseEntity<?> getCurrentUsername() {
+		System.out.println("Controller hit");
 		return ResponseEntity.ok(Map.of("username", profileService.getUsername()));
 	}
 

@@ -1,5 +1,6 @@
 package com.ChatMap.Auth.Config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,20 +21,20 @@ public class SecurityConfig {
 		return new BCryptPasswordEncoder();
 	}
 	
-	@Bean
-	ValidateJwtFilter validateJwtFilter() {
-		return new ValidateJwtFilter();
-	}
+	@Autowired
+	ValidateJwtFilter validateJwtFilter;
+	
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf((csrf) -> csrf.disable())
 
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/auth/signup", "/auth/login").permitAll()
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/auth/**","/health").permitAll()
 						.anyRequest().authenticated())
+				.addFilterBefore(validateJwtFilter, UsernamePasswordAuthenticationFilter.class)
+				;
 
-				.addFilterBefore(validateJwtFilter(), UsernamePasswordAuthenticationFilter.class);
-
+				
 		return http.build();
 	}
 }

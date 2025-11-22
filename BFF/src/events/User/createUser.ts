@@ -41,7 +41,7 @@ routerCreateUser.post("/create", async (req, res) => {
       const jwt = err.config.headers.Authorization.split(" ")[1];
       try {
         await axios.post(
-          `${process.env.AUTH_URL}/auth/delete`,
+          `${process.env.AUTH_URL}/protected/delete`,
           {},
           { headers: { Authorization: "Bearer " + jwt } }
         );

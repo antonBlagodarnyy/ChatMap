@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.stereotype.Controller;
-
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,15 +36,11 @@ public class AuthController {
 
 	@PostMapping(path = "/login")
 	public @ResponseBody ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) throws Exception {
+
 		final String jwt = authService.loginUser(loginRequest);
 
 		return ResponseEntity.ok(Map.of("jwt", jwt));
 	}
 
-	@PostMapping(path = "/delete")
-	public @ResponseBody ResponseEntity<Void> deleteUser()
-			throws Exception {
-		authService.deleteUser();
-		return ResponseEntity.ok().build();
-	}
+
 }
