@@ -59,7 +59,7 @@ export class ChatComponent implements OnInit {
 
 
     this.chatService.retrieveMessages$().subscribe((res)=>
-    this.messages.set(res.locations)
+    this.messages.set(res.messages)
     )
 
     this.chatService.connect$().subscribe((msg) => {

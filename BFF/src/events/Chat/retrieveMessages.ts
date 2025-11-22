@@ -23,11 +23,12 @@ routeMessagesRetrieve.get("/retrieve/:receiver", jwtCheck, async (req, res) => {
         }
       );
 
+      //Map of the users ids to their respective username
       const usersIds = [
         ...new Set(routeMessagesRetrieveRes.data.map((item) => item.sender)),
       ];
 
-      var locations = routeMessagesRetrieveRes.data;
+      var messages = routeMessagesRetrieveRes.data;
 
       if(usersIds.length!=0){
  
@@ -44,10 +45,8 @@ routeMessagesRetrieve.get("/retrieve/:receiver", jwtCheck, async (req, res) => {
         }
       );
 
-
-      locations = routeMessagesRetrieveRes.data.map((msg) => {
+      messages = routeMessagesRetrieveRes.data.map((msg) => {
         const username = sendersUsernamesRes.data.usernames[String(msg.sender)];
-        console.log(username)
         return {
           ...msg,
           sender: username || msg.sender, // fallback si no se encuentra username
@@ -58,7 +57,7 @@ routeMessagesRetrieve.get("/retrieve/:receiver", jwtCheck, async (req, res) => {
 
 
   
-      res.status(200).json({ locations: locations });
+      res.status(200).json({ messages: messages });
     } catch (err: any) {
       console.log(err);
       //If failed, return an error

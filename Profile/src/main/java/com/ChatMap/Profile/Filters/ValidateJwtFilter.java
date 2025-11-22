@@ -47,7 +47,6 @@ public class ValidateJwtFilter extends OncePerRequestFilter {
 
 		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
 			jwt = authorizationHeader.substring(7);
-			System.out.println(jwt);
 			decodedJwt = jwtService.decodeJwt(jwt);
 		}
 		String userId = decodedJwt.getSubject();
@@ -60,7 +59,6 @@ public class ValidateJwtFilter extends OncePerRequestFilter {
 
 		SecurityContextHolder.getContext().setAuthentication(authToken);
 
-		System.out.println((Integer) (SecurityContextHolder.getContext().getAuthentication().getPrincipal()));
 		
 		filterChain.doFilter(request, response);
 	}

@@ -103,7 +103,7 @@ export class ChatService {
       filter(Boolean),
       switchMap((r) => {
         console.log(r);
-        return this.http.get<{locations:[]}>(environment.apiUrl + 'message/retrieve/' + r?.id);
+        return this.http.get<{messages:[]}>(environment.apiUrl + 'message/retrieve/' + r?.id);
       })
     );
   }
