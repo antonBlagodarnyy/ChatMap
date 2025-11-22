@@ -1,7 +1,7 @@
 import axios from "axios";
 import express from "express";
 import { jwtCheck } from "../../middleware/JwtCheck.js";
-import type { IRequestMessage } from "../../Interfaces/IRequestMessage.js";
+import type { IResponseMessageDTO } from "../../Interfaces/IResponseMessageDTO.js";
 
 const routeMessagesRetrieve = express.Router({ mergeParams: true });
 
@@ -10,7 +10,7 @@ routeMessagesRetrieve.get("/retrieve/:receiver", jwtCheck, async (req, res) => {
 
   if (token)
     try {
-      const routeMessagesRetrieveRes = await axios.get<IRequestMessage[]>(
+      const routeMessagesRetrieveRes = await axios.get<IResponseMessageDTO[]>(
         `${process.env.MESSAGE_URL}/message/retrieve`,
         {
           headers: {
@@ -28,36 +28,30 @@ routeMessagesRetrieve.get("/retrieve/:receiver", jwtCheck, async (req, res) => {
         ...new Set(routeMessagesRetrieveRes.data.map((item) => item.sender)),
       ];
 
-      var messages = routeMessagesRetrieveRes.data;
+      if (usersIds.length != 0) {
+        const sendersUsernamesRes = await axios.get(
+          `${process.env.PROFILE_URL}/profile/usernamesById`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token,
+            },
+            params: {
+              usersIds: usersIds,
+            },
+          }
+        );
 
-      if(usersIds.length!=0){
- 
-      const sendersUsernamesRes = await axios.get(
-        `${process.env.PROFILE_URL}/profile/usernamesById`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token,
-          },
-          params: {
-            usersIds: usersIds,
-          },
-        }
-      );
-
-      messages = routeMessagesRetrieveRes.data.map((msg) => {
-        const username = sendersUsernamesRes.data.usernames[String(msg.sender)];
-        return {
-          ...msg,
-          sender: username || msg.sender, // fallback si no se encuentra username
-        };
-      });
-
+        const messages = routeMessagesRetrieveRes.data.map((msg) => {
+          const username =
+            sendersUsernamesRes.data.usernames[String(msg.sender)];
+          return {
+            ...msg,
+            sender: username || msg.sender, // fallback si no se encuentra username
+          };
+        });
+        res.status(200).json({ messages: messages });
       }
-
-
-  
-      res.status(200).json({ messages: messages });
     } catch (err: any) {
       console.log(err);
       //If failed, return an error

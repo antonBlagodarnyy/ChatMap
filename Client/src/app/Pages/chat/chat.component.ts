@@ -57,17 +57,27 @@ export class ChatComponent implements OnInit {
       }
     });
 
-
-    this.chatService.retrieveMessages$().subscribe((res)=>
-    this.messages.set(res.messages)
-    )
+    this.chatService.retrieveMessages$().subscribe((res) =>
+      this.messages.set(
+        //Map of the date received from the bd since its format is different in ts
+        res.messages.map((m) => {
+          return {
+            ...m,
+            ts: new Date(m.ts).toLocaleString(),
+          };
+        })
+      )
+    );
 
     this.chatService.connect$().subscribe((msg) => {
       //On message received update the messages
       this.messages.update((oldMessages) => {
         return oldMessages
-          ? [...oldMessages, { sender: this.recipientUsername, text: msg.msg }]
-          : [{ sender: this.recipientUsername, text: msg.msg }];
+          ? [
+              ...oldMessages,
+              { sender: this.recipientUsername, text: msg.msg, ts: msg.ts },
+            ]
+          : [{ sender: this.recipientUsername, text: msg.msg, ts: msg.ts }];
       });
     });
   }
@@ -75,9 +85,10 @@ export class ChatComponent implements OnInit {
   sendMsg(msg: string) {
     //Update the messages container and send it to the ws
     this.messages.update((oldMessages) => {
+      const now = new Date().toLocaleString();
       return oldMessages
-        ? [...oldMessages, { sender: this.senderUsername, text: msg }]
-        : [{ sender: this.senderUsername, text: msg }];
+        ? [...oldMessages, { sender: this.senderUsername, text: msg, ts: now }]
+        : [{ sender: this.senderUsername, text: msg, ts: now }];
     });
     this.chatService.sendMsg(msg);
   }

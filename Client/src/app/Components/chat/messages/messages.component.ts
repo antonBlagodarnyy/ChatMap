@@ -23,9 +23,9 @@ import { NgClass } from '@angular/common';
       <div
         class="container-messages-message"
         [ngClass]="
-          recipientName() != msg.sender
-            ? 'container-messages-message-sent'
-            : 'container-messages-message-received'
+          recipientName() == msg.sender
+            ? 'container-messages-message-received'
+            : 'container-messages-message-sent'
         "
       >
         <div class="container-messages-message-content">
@@ -33,7 +33,9 @@ import { NgClass } from '@angular/common';
           <mat-chip>{{ msg.sender }}</mat-chip>
           }
           <span class="text">{{ msg.text }}</span>
+       
         </div>
+        <span class="date">{{ msg.ts }}</span>
       </div>
 
       }
@@ -80,6 +82,10 @@ import { NgClass } from '@angular/common';
   .text{
     margin-left:2vh;
     margin-right:2vh;
+  }
+  .date{
+    margin: 1vh;
+    color: #C4C4C4;
   }
   `,
 })

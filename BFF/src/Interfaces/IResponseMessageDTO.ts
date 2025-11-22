@@ -1,4 +1,4 @@
-export interface IRequestMessage {
+export interface IResponseMessageDTO {
   id: number;
   sender: number;
   receiver: number;

@@ -1,5 +1,5 @@
 import { WebSocketServer, WebSocket } from "ws";
-import type { IResponseMessage } from "../../Interfaces/IResponseMessage.js";
+import type { IWsMessage } from "../../Interfaces/IWsMessage.js";
 import jwt from "jsonwebtoken";
 import axios from "axios";
 
@@ -37,20 +37,18 @@ const configWs = (wss: WebSocketServer) => {
     // Handle incoming messages
     ws.on("message", function message(data) {
       try {
-        const parsed: IResponseMessage = JSON.parse(data.toString());
+        const parsedMsg: IWsMessage = JSON.parse(data.toString());
 
         const senderId: number = (ws as any).user.sub;
 
-        const { to, msg } = parsed;
+        console.log(`Message from ${senderId} to ${parsedMsg.to}: ${parsedMsg.msg}`);
 
-        console.log(`Message from ${senderId} to ${to}: ${msg}`);
-
-        const recipientWs = clients.get(to);
+        const recipientWs = clients.get(parsedMsg.to);
 
         //Post message to db
         axios.post(
           `${process.env.MESSAGE_URL}/message/save`,
-          { receiver: to, text: msg },
+          { receiver: parsedMsg.to, text: parsedMsg.msg },
           {
             headers: {
               "Content-Type": "application/json",
@@ -63,12 +61,12 @@ const configWs = (wss: WebSocketServer) => {
         if (recipientWs && recipientWs.readyState === WebSocket.OPEN) {
           recipientWs.send(
             JSON.stringify({
-              to: to,
-              msg: msg,
+              to: parsedMsg.to,
+              msg: parsedMsg.msg,
             })
           );
         } else {
-          console.warn(`Recipient ${to} not connected.`);
+          console.warn(`Recipient ${parsedMsg.to} not connected.`);
         }
       } catch (err) {
         console.error("Invalid message format", err);

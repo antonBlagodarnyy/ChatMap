@@ -19,6 +19,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { LoadingComponent } from '../Components/loading/loading.component';
 import { UserService } from './user.service';
 import { HttpClient } from '@angular/common/http';
+import { IMessage } from '../Interfaces/IMessage';
 
 @Injectable({
   providedIn: 'root',
@@ -102,8 +103,9 @@ export class ChatService {
     return this.getRecipient$().pipe(
       filter(Boolean),
       switchMap((r) => {
-        console.log(r);
-        return this.http.get<{messages:[]}>(environment.apiUrl + 'message/retrieve/' + r?.id);
+        return this.http.get<{ messages: IMessage[] }>(
+          environment.apiUrl + 'message/retrieve/' + r?.id
+        );
       })
     );
   }
