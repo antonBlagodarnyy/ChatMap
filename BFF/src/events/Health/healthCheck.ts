@@ -22,7 +22,7 @@ routerHealth.get("/check", async (req, res) => {
       await axios.get(url);
     } catch (err: any) {
       //If failed, return an error
-      
+      console.log(err)
       const status = err.code == "ECONNREFUSED" ? 503 : err.response.status;
       const msg =
         err.code == "ECONNREFUSED"
