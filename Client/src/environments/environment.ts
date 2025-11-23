@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'undefined',
-  wsUrl: 'undefined',
+  apiUrl: 'https://chatmap-bff.onrender.com',
+  wsUrl: 'wss://chatmap-bff.onrender.com',
 };
