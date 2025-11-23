@@ -18,7 +18,7 @@ dotenv.config();
 const app = express();
 
 //Rest config
-const restPort = 3000;
+const port = 3000;
 app.use(express.json());
 app.use(
   cors({
@@ -43,15 +43,14 @@ app.use("/health", routerHealth);
 
 //Ws config
 const server = http.createServer();
-const wsPort = 3001;
 const wss = new WebSocketServer({ server });
 
 configWs(wss);
 
 //Run endpoints
-server.listen(wsPort, () => {
-  console.log(`ws listening on port: ${wsPort}`);
+server.listen(port, () => {
+  console.log(`ws listening on port: ${port}`);
 });
-app.listen(restPort, () => {
-  console.log(`rest listening on port ${restPort}`);
+app.listen(port, () => {
+  console.log(`rest listening on port ${port}`);
 });
