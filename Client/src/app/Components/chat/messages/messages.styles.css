@@ -1,0 +1,51 @@
+/* Hide scrollbar for Chrome, Safari and Opera */
+.container-messages::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.container-messages {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.container-messages {
+  border: 1px solid black;
+  border-radius: 5vh;
+  padding: 1vh;
+  height: 60vh;
+  overflow-y: auto;
+  overflow-wrap: break-word;
+}
+.container-messages-message {
+  margin: 2vh;
+  display: flex;
+  align-items: center;
+  border-radius: 1vh;
+}
+.container-messages-message-content{
+    border-radius: 2vh;
+padding: 1vh;
+}
+.container-messages-message-sent {
+ 
+  justify-content: flex-end;
+}
+.container-messages-message-received .container-messages-message-content {
+  background-color: #e0e0e0;
+}
+.container-messages-message-sent .container-messages-message-content {
+  background-color: #bbffad;
+}
+.text {
+  margin-left: 2vh;
+  margin-right: 2vh;
+  word-break: break-word;
+}
+.date {
+    display:inline-block;
+  margin: 1vh;
+  font-size: small;
+  color: #424242ff;
+
+}
