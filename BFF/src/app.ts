@@ -42,15 +42,12 @@ app.use("/message", routeMessagesRetrieve);
 app.use("/health", routerHealth);
 
 //Ws config
-const server = http.createServer();
+const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
 configWs(wss);
 
 //Run endpoints
 server.listen(port, () => {
-  console.log(`ws listening on port: ${port}`);
-});
-app.listen(port, () => {
-  console.log(`rest listening on port ${port}`);
+  console.log(`servert listening on port: ${port}`);
 });
