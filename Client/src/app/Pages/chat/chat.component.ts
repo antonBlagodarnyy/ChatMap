@@ -72,12 +72,13 @@ export class ChatComponent implements OnInit {
     this.chatService.connect$().subscribe((msg) => {
       //On message received update the messages
       this.messages.update((oldMessages) => {
+        const now = new Date().toLocaleString();
         return oldMessages
           ? [
               ...oldMessages,
-              { sender: this.recipientUsername, text: msg.msg, ts: msg.ts },
+              { sender: this.recipientUsername, text: msg.msg, ts: now },
             ]
-          : [{ sender: this.recipientUsername, text: msg.msg, ts: msg.ts }];
+          : [{ sender: this.recipientUsername, text: msg.msg, ts: now }];
       });
     });
   }
