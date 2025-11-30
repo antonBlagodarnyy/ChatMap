@@ -43,7 +43,7 @@ app.use("/health", routerHealth);
 
 //Ws config
 const server = http.createServer(app);
-const wss = new WebSocketServer({ server });
+const wss = new WebSocketServer({ server, path: "/messages" });
 
 configWs(wss);
 

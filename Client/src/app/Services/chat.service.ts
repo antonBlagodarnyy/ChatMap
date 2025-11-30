@@ -1,19 +1,7 @@
 import { Injectable } from '@angular/core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { AuthService } from './auth.service';
-import { IUser } from '../Interfaces/IUser';
-import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
-import {
-  BehaviorSubject,
-  combineLatest,
-  concatMap,
-  EMPTY,
-  filter,
-  map,
-  mergeMap,
-  pairwise,
-  switchMap,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest, EMPTY, filter, switchMap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { MatDialog } from '@angular/material/dialog';
 import { LoadingComponent } from '../Components/loading/loading.component';
@@ -75,7 +63,7 @@ export class ChatService {
         if (user) {
           this.wsSubject = webSocket({
             //Gets the ws url
-            url: environment.wsUrl + '?token=' + user.token,
+            url: environment.wsUrl + 'messages' + '?token=' + user.token,
             //How to process outgoing messages
             serializer: (res) => {
               return JSON.stringify({ to: recipient?.id, msg: res });
@@ -104,7 +92,7 @@ export class ChatService {
       filter(Boolean),
       switchMap((r) => {
         return this.http.get<{ messages: IMessage[] }>(
-          environment.apiUrl + 'message/retrieve/' + r?.id
+          environment.apiUrl + 'message/retrieveMessages/' + r?.id
         );
       })
     );

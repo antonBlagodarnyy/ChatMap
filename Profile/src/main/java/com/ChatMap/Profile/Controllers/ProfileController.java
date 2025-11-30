@@ -35,7 +35,6 @@ public class ProfileController {
 
 	@GetMapping("/currentUsername")
 	public @ResponseBody ResponseEntity<?> getCurrentUsername() {
-		System.out.println("Controller hit");
 		return ResponseEntity.ok(Map.of("username", profileService.getUsername()));
 	}
 

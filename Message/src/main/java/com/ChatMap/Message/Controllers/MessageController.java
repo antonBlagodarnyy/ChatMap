@@ -35,9 +35,12 @@ public class MessageController {
 		return ResponseEntity.ok().build();
 	}
 
-	@GetMapping("/retrieve")
+	@GetMapping("/retrieveMessages")
 	public @ResponseBody ResponseEntity<?> retrieveMessages(@RequestParam Integer receiver) {
 		return ResponseEntity.ok(messageService.retrieveMessages(receiver));
-
+	}
+	@GetMapping("/retrieveConversations")
+	public @ResponseBody ResponseEntity<?> retrieveConversations() {
+		return ResponseEntity.ok(messageService.retrieveOpenedConversations());
 	}
 }

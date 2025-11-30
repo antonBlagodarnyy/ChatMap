@@ -26,4 +26,8 @@ public class MessageService {
 		Integer userId = (Integer) (SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		return messageRepository.findConversation(userId, receiver);
 	}
+	public List<Message> retrieveOpenedConversations() {
+		Integer userId = (Integer) (SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		return messageRepository.findMessagesBySenderOrReceiver(userId);
+	}
 }
