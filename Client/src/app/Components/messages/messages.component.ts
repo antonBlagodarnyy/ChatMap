@@ -5,7 +5,7 @@ import {
   input,
   ViewChild,
 } from '@angular/core';
-import { IMessage } from '../../../Interfaces/IMessage';
+import { IMessage } from '../../Interfaces/IMessage';
 import { MatChipsModule } from '@angular/material/chips';
 import { NgClass } from '@angular/common';
 

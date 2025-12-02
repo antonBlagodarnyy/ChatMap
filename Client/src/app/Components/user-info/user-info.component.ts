@@ -5,12 +5,12 @@ import {
   MatDialogRef,
   MatDialogTitle,
 } from '@angular/material/dialog';
-import { UserService } from '../../../Services/user.service';
-import { IUser } from '../../../Interfaces/IUser';
+import { UserService } from '../../Services/user.service';
+import { IUser } from '../../Interfaces/IUser';
 import { MatChipsModule } from '@angular/material/chips';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { ChatService } from '../../../Services/chat.service';
+import { ChatService } from '../../Services/chat.service';
 
 @Component({
   selector: 'app-user-info',

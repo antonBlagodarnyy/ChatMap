@@ -36,17 +36,6 @@ export class LocationService {
     );
   }
 
-  putUsersLocation$(userId: number, lat: number, lon: number) {
-    return this.http.put<IUserLocation>(
-      environment.apiUrl + 'userslocations/put',
-      {
-        id: userId,
-        latitude: lat,
-        longitude: lon,
-      }
-    );
-  }
-
   getNearbyLocationsNotCurrent$(lat: number, lon: number, radius: number) {
     return this.http.get<{ locations: IUserLocation[] }>(
       `${environment.apiUrl}location/nearbyNotCurrent/${lat}/${lon}/${radius}`

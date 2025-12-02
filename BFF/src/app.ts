@@ -12,6 +12,7 @@ import { WebSocketServer } from "ws";
 import configWs from "./events/Chat/webSocketConnection.js";
 import routeMessagesRetrieve from "./events/Chat/retrieveMessages.js";
 import routerHealth from "./events/Health/healthCheck.js";
+import routeChatHistoryRetrieve from "./events/Chat/retrieveChatHistory.js";
 
 //General config
 dotenv.config();
@@ -37,7 +38,7 @@ app.use(
 );
 app.use("/user", routerCreateUser, routerLogin, routerUserData);
 
-app.use("/message", routeMessagesRetrieve);
+app.use("/message", routeMessagesRetrieve, routeChatHistoryRetrieve);
 
 app.use("/health", routerHealth);
 

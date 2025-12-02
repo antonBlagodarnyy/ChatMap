@@ -2,17 +2,14 @@ import { Injectable } from '@angular/core';
 import { MarkerService } from './marker.service';
 import TileLayer from 'ol/layer/Tile';
 import { combineLatest, fromEventPattern, map, switchMap } from 'rxjs';
-import OSM from 'ol/source/OSM';
 import View from 'ol/View';
 import Map from 'ol/Map';
 import { MatDialog } from '@angular/material/dialog';
-import { UserInfoComponent } from '../Components/map/user-info/user-info.component';
+import { UserInfoComponent } from '../Components/user-info/user-info.component';
 import { LocationService } from './location.service';
 import { fromLonLat, toLonLat } from 'ol/proj';
 import Layer from 'ol/layer/Layer';
 import XYZ from 'ol/source/XYZ';
-import { Coordinate } from 'ol/coordinate';
-import { getDistance } from 'ol/sphere';
 
 @Injectable({
   providedIn: 'root',

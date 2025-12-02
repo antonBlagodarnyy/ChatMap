@@ -1,9 +1,9 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ChatService } from '../../Services/chat.service';
 import { IMessage } from '../../Interfaces/IMessage';
-import { MessagesComponent } from '../../Components/chat/messages/messages.component';
-import { InputBoxComponent } from '../../Components/chat/messages/input-box/input-box.component';
-import { HeaderComponent } from '../../Components/map/header/header.component';
+import { MessagesComponent } from '../../Components/messages/messages.component';
+import { InputBoxComponent } from '../../Components/messages/input-box/input-box.component';
+import { HeaderComponent } from '../../Components/header/header.component';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -24,7 +24,6 @@ import { ActivatedRoute } from '@angular/router';
     flex-direction:column;
     justify-content:center;
     align-items:center;
-  
   }
   app-messages{
     width:80%;

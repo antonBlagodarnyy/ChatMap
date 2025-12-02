@@ -2,7 +2,7 @@ import axios, { AxiosError } from "axios";
 import express from "express";
 import { jwtCheck } from "../../middleware/JwtCheck.js";
 import type { IResponseMessageDTO } from "../../Interfaces/IResponseMessageDTO.js";
-import parseSendersAndReceivers from "../../utils/parseMessages.js";
+import parseUserIds from "../../utils/parseUserIds.js";
 
 const routeMessagesRetrieve = express.Router({ mergeParams: true });
 
@@ -27,16 +27,36 @@ routeMessagesRetrieve.get(
           }
         );
 
-        const messages = await parseSendersAndReceivers(
-          routeMessagesRetrieveRes.data,
-          token,
-          res
-        );
+        const rawMessages = routeMessagesRetrieveRes.data;
 
-        res.status(200).json({ messages: messages });
+        if (rawMessages.length > 0) {
+          //Map of the users ids to their respective username
+          const idSet = new Set([
+            ...rawMessages.map((item) => item.sender),
+            ...rawMessages.map((item) => item.receiver),
+          ]);
+        
+
+          const usernamesMap = await parseUserIds(idSet, token);
+
+          if (!usernamesMap)
+            throw Error(
+              "[RetrieveMessages.ts -> routeMessagesRetrieve.get()]: usernamesMap is undefined"
+            );
+
+          const messages = rawMessages.map((r) => {
+            return {
+              ...r,
+              sender: usernamesMap[r.sender] ?? "unknown",
+              receiver: usernamesMap[r.receiver] ?? "unknown",
+            };
+          });
+          res.status(200).json({ messages: messages });
+        } else res.status(200).json({ messages: {} });
       } catch (err: any) {
-        console.log(
-          `[retrieveMessages.ts -> routeMessagesRetrieve.get()] \n ${err.response}`
+        console.error(
+          `[retrieveMessages.ts -> routeMessagesRetrieve.get()]`,
+          err
         );
         //If failed, return an error
         const status = err.code == "ECONNREFUSED" ? 503 : err.response.status;

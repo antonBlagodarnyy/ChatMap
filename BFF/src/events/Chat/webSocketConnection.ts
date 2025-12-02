@@ -3,7 +3,7 @@ import type { IWsMessage } from "../../Interfaces/IWsMessage.js";
 import jwt from "jsonwebtoken";
 import axios from "axios";
 
-const configWs = (wss: WebSocketServer) => {
+function configWs(wss: WebSocketServer) {
   // Maps user IDs (sub from JWT) to WebSocket connections
   const clients = new Map<number, WebSocket>();
 
@@ -16,18 +16,17 @@ const configWs = (wss: WebSocketServer) => {
       return;
     }
 
-    let decoded: any;
-
     try {
-
-      decoded = jwt.verify(token, process.env.JWT_KEY!);
+      const decoded = jwt.verify(token, process.env.JWT_KEY!);
       console.log("Authenticated user:", decoded.sub);
 
-      // Save this user's WebSocket connection
-      clients.set(+decoded.sub, ws);
+      if (decoded.sub) {
+        // Save this user's WebSocket connection
+        clients.set(+decoded.sub, ws);
 
-      // Store user info on the socket for later use
-      (ws as any).user = decoded;
+        // Store user info on the socket for later use
+        (ws as any).user = decoded;
+      }
     } catch (error: any) {
       console.error("Invalid JWT: " + error.message);
       ws.close();
@@ -38,12 +37,6 @@ const configWs = (wss: WebSocketServer) => {
     ws.on("message", function message(data) {
       try {
         const parsedMsg: IWsMessage = JSON.parse(data.toString());
-
-        const senderId: number = (ws as any).user.sub;
-
-        console.log(`Message from ${senderId} to ${parsedMsg.to}: ${parsedMsg.msg}`);
-
-        const recipientWs = clients.get(parsedMsg.to);
 
         //Post message to db
         axios.post(
@@ -56,6 +49,8 @@ const configWs = (wss: WebSocketServer) => {
             },
           }
         );
+
+        const recipientWs = clients.get(parsedMsg.to);
 
         //Send the msg
         if (recipientWs && recipientWs.readyState === WebSocket.OPEN) {
@@ -81,6 +76,6 @@ const configWs = (wss: WebSocketServer) => {
       }
     });
   });
-};
+}
 
 export default configWs;

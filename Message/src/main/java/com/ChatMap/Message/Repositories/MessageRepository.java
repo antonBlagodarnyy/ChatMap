@@ -10,7 +10,7 @@ import com.ChatMap.Message.Entities.Message;
 
 public interface MessageRepository extends JpaRepository<Message, Integer> {
     @Query("SELECT m FROM Message m WHERE (m.sender = :user1 AND m.receiver = :user2) OR (m.sender = :user2 AND m.receiver = :user1) ORDER BY m.ts ASC")
-    List<Message> findConversation(@Param("user1") Integer user1, @Param("user2") Integer user2);
+    List<Message> findMessagesBetweenTwoUsers(@Param("user1") Integer user1, @Param("user2") Integer user2);
     
     @Query("""
     		  SELECT m FROM Message m 
@@ -26,5 +26,5 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
     						)
     					ORDER BY m.ts DESC
     		 """)
-    List<Message> findMessagesBySenderOrReceiver(@Param("userId") Integer userId);
+    List<Message> findConversartions(@Param("userId") Integer userId);
 }

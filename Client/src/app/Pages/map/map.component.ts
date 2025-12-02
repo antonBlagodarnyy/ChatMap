@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { HeaderComponent } from '../../Components/map/header/header.component';
+import { HeaderComponent } from '../../Components/header/header.component';
 import Map from 'ol/Map.js';
 import { MatIconModule } from '@angular/material/icon';
 import { MapService } from '../../Services/map.service';
