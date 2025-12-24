@@ -1,6 +1,7 @@
 package com.ChatMap.Api.Services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ public class AuthService {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
-	public String saveUser(SignupRequest signupRequest) {
+    public String saveUser(SignupRequest signupRequest) {
 		if (userRepository.findByEmail(signupRequest.getEmail()) != null)
 			throw new EmailAlreadyExistsException();
 
@@ -54,6 +55,7 @@ public class AuthService {
 		return jwtService.generateJwtToken(user.getId());
 
 	}
+
 
 	public void deleteUser() {
 		Integer userId = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

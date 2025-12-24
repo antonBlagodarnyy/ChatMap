@@ -1,1 +1,0 @@
-{"version":3,"file":"IResponseMessageDTO.d.ts","sourceRoot":"","sources":["../../src/Interfaces/IResponseMessageDTO.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,mBAAmB;IAClC,EAAE,EAAE,MAAM,CAAC;IACX,MAAM,EAAE,MAAM,CAAC;IACf,QAAQ,EAAE,MAAM,CAAC;IACjB,IAAI,EAAE,MAAM,CAAC;IACb,EAAE,EAAE,MAAM,CAAC;CACZ"}

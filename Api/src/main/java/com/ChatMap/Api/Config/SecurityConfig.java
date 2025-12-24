@@ -1,6 +1,5 @@
 package com.ChatMap.Api.Config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,25 +16,25 @@ import com.ChatMap.Api.Filters.ValidateJwtFilter;
 @EnableWebSecurity
 public class SecurityConfig {
 
-	@Bean
-	 PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
-	
-	@Autowired
-	ValidateJwtFilter validateJwtFilter;
-	
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.csrf(AbstractHttpConfigurer::disable)
+    @Bean
+    SecurityFilterChain securityFilterChain(
+			HttpSecurity http,
+			ValidateJwtFilter validateJwtFilter) throws Exception {
+        http.csrf(AbstractHttpConfigurer::disable)
 
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/auth/**","/health").permitAll()
-						.anyRequest().authenticated())
-				.addFilterBefore(validateJwtFilter, UsernamePasswordAuthenticationFilter.class)
-				;
+                .authorizeHttpRequests(auth -> auth
+						.requestMatchers("/auth/**", "/health")
+						.permitAll()
+                        .anyRequest().authenticated())
+                .addFilterBefore(validateJwtFilter, UsernamePasswordAuthenticationFilter.class)
+        ;
 
-				
-		return http.build();
-	}
+
+        return http.build();
+    }
 }

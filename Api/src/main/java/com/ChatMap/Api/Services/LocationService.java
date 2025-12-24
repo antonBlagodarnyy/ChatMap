@@ -3,9 +3,11 @@ package com.ChatMap.Api.Services;
 
 import com.ChatMap.Api.Dto.CreateLocationRequest;
 import com.ChatMap.Api.Entities.Location;
+import com.ChatMap.Api.Models.CustomUserDetails;
 import com.ChatMap.Api.Repositories.LocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,37 +15,39 @@ import java.util.List;
 @Service
 public class LocationService {
 
-	@Autowired
-	LocationRepository locationRepository;
+    @Autowired
+    LocationRepository locationRepository;
 
-	public void createLocation(CreateLocationRequest createLocationRequest) {
-		Integer id = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public void createLocation(CreateLocationRequest createLocationRequest) {
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
 
-		Location location = new Location();
-		location.setLatitude(createLocationRequest.getLatitude());
-		location.setLongitude(createLocationRequest.getLongitude());
-		location.setId(id);
+        Location location = new Location();
+        location.setLatitude(createLocationRequest.getLatitude());
+        location.setLongitude(createLocationRequest.getLongitude());
+        location.setId(Integer.parseInt(userDetails.getUsername()));
 
-		locationRepository.save(location);
-	}
+        locationRepository.save(location);
+    }
 
-	public Location getCurrentLocation() {
-		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public Location getCurrentLocation() {
+        CustomUserDetails  userDetails = (CustomUserDetails) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
 
-		if (principal instanceof Integer id) {
-			return locationRepository.findById(id).orElse(null);
-		}
+        return locationRepository.findById(userDetails.getId()).orElse(null);
+    }
 
-		return null;
-	}
+    public List<Location> getNearbyLocationsNotCurrent(Double lat, Double lon, Double radius) {
+        CustomUserDetails  userDetails = (CustomUserDetails) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
 
-	public List<Location> getNearbyLocationsNotCurrent(Double lat, Double lon, Double radius) {
-		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-		if (principal instanceof Integer id)
-			return locationRepository.findNearbyLocationsNotCurrent(lat,
-					lon, radius, id);
-		else
-			return null;
-	}
+            return locationRepository.findNearbyLocationsNotCurrent(lat,
+                    lon, radius, userDetails.getId());
+    }
 }

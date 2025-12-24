@@ -3,23 +3,29 @@ package com.ChatMap.Api.Services;
 import java.util.Calendar;
 
 
-import org.springframework.beans.factory.annotation.Value;
-
-import org.springframework.stereotype.Service;
-
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+
+import org.springframework.stereotype.Service;
+
+
 
 @Service
 public class JwtService {
 
-	@Value("${JWT_KEY}")
+    private static final Logger log = LoggerFactory.getLogger(JwtService.class);
+
+    @Value("${jwt.key}")
 	private String secretKey;
 
-	@Value("${JWT_EXPIRATION}")
+	@Value("${jwt.expiration}")
 	private Long expirationMs;
 
 	public String generateJwtToken(Integer authenticatedId) {
@@ -31,7 +37,7 @@ public class JwtService {
 			token = JWT.create().withIssuer("ChatMapAuth").withSubject("" + authenticatedId)
 					.withExpiresAt(time.getTime()).sign(algorithm);
 		} catch (JWTCreationException exception) {
-			System.out.println(exception);
+			log.error("e: ", exception);
 		}
 
 		return token;

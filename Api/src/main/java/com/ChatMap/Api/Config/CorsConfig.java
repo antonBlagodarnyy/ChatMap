@@ -8,10 +8,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
 	
-	@Value("${BFF_URL}")
-	private String bffUrl;
+	@Value("${CLIENT_URL:http://localhost:4200}")
+	private String clientUrl;
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
-		registry.addMapping("/**").allowedOrigins(bffUrl);
+		registry.addMapping("/**").allowedOrigins(clientUrl);
 	}
 }

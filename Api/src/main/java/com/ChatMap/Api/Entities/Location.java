@@ -3,7 +3,7 @@ package com.ChatMap.Api.Entities;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "Location")
+@Table(name = "Locations")
 public class Location {
 
 	@Id

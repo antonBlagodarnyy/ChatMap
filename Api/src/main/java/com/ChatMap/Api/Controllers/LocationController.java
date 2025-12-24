@@ -21,7 +21,6 @@ public class LocationController {
 	@Autowired
 	LocationService locationService;
 
-	// TODO handle exceptios
 	@GetMapping("/health")
 	public @ResponseBody ResponseEntity<?> health() {
 		return ResponseEntity.ok().build();

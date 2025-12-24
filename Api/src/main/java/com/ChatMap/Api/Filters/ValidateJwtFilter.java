@@ -3,13 +3,19 @@ package com.ChatMap.Api.Filters;
 import java.io.IOException;
 import java.util.List;
 
+import com.ChatMap.Api.Entities.User;
+import com.ChatMap.Api.Models.CustomUserDetails;
+import com.ChatMap.Api.Services.JwtService;
+import com.ChatMap.Api.Services.UserService;
+import jakarta.annotation.Nonnull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.ChatMap.Api.Services.JwtService;
+
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
@@ -24,22 +30,24 @@ public class ValidateJwtFilter extends OncePerRequestFilter {
 	@Autowired
 	private JwtService jwtService;
 
-	   private final List<String> excludedPaths = List.of(
-		        "/health",
-		        "/auth"
-		    );
+	@Autowired
+	private UserService userService;
+
+   private final List<String> excludedPaths = List.of(
+			"/health",
+			"/auth"
+		);
 	   
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request) {
 		String path = request.getRequestURI();
-	    return excludedPaths.stream().anyMatch(p -> path.contains(p));
+	    return excludedPaths.stream().anyMatch(path::contains);
 	}
 	
 	
 	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+	protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain filterChain)
 			throws ServletException, IOException {
-		System.out.println("Filter hit");
 		try {
 			final String authorizationHeader = request.getHeader("Authorization");
 
@@ -50,13 +58,22 @@ public class ValidateJwtFilter extends OncePerRequestFilter {
 				jwt = authorizationHeader.substring(7);
 				decodedJwt = jwtService.decodeJwt(jwt);
 			}
+
+			if(decodedJwt==null){
+				throw new JWTVerificationException("Failed decoding jwt");
+			}
+
 			String userId = decodedJwt.getSubject();
 
 			if (userId == null)
 				throw new JWTVerificationException("No user in the jwt");
 
+			User user = userService.findUserById(Integer.parseInt(userId));
+
+			CustomUserDetails userDetails = new CustomUserDetails(user.getUsername(),user.getPassword(),user.getId());
+
 			UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-					Integer.parseInt(userId), null, List.of());
+					userDetails, null, List.of());
 
 			SecurityContextHolder.getContext().setAuthentication(authToken);
 		} catch (Exception e) {
