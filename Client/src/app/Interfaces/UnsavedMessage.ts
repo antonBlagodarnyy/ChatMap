@@ -1,7 +1,7 @@
-import { BaseMessage } from "./Mesage";
+import { BaseMessage } from './Mesage';
 
-export interface UnsavedMessage extends BaseMessage{
-    type:'UNSAVED';
-  receiver:number;
+export interface UnsavedMessage extends BaseMessage {
+  type: 'UNSAVED';
+  receiver: number;
   text: string;
 }

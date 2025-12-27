@@ -56,7 +56,7 @@ export class ChatHistoryComponent implements OnInit {
 
   ngOnInit(): void {
     this.chatService.chatHistory$().subscribe((res) => {
-      console.log(res);
+
       this.chats.set(res);
     });
   }

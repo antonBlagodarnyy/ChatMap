@@ -46,13 +46,18 @@ export class ChatService {
         if (user && this.receiver) {
           this.wsSubject = webSocket({
             //Gets the ws url
-            url: environment.wsUrl + 'messages' + '?token=' + user.token,
+            url: environment.wsUrl + 'messages',
 
             //What to do once the connection is opened
             openObserver: {
               next: () => {
                 if (this.spinnerRef) this.spinnerRef.close();
                 clearTimeout(this.spinnerTimeout);
+                if (this.wsSubject)
+                  this.wsSubject.next({
+                    type: 'CONNECTION',
+                    token: user.token,
+                  });
               },
             },
           });
@@ -85,8 +90,8 @@ export class ChatService {
           .pipe(tap((r) => this.messages.next(r.messages)))
       : EMPTY;
   }
-  
-   chatHistory$() {
+
+  chatHistory$() {
     return this.http.get<ChatPreview[]>(
       environment.apiUrl + 'message/retrieveChats'
     );
