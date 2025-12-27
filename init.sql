@@ -1,22 +1,22 @@
-CREATE TABLE `Users` (
+CREATE TABLE `users` (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
     username VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE Locations (
+CREATE TABLE locations (
       id INT NOT NULL,
       latitude DOUBLE NOT NULL,
       longitude DOUBLE NOT NULL,
       PRIMARY KEY (id),
       CONSTRAINT fk_location_user
           FOREIGN KEY (id)
-              REFERENCES `Users`(id)
+              REFERENCES `users`(id)
               ON DELETE CASCADE
 );
 
-CREATE TABLE Messages (
+CREATE TABLE messages (
      id INT AUTO_INCREMENT PRIMARY KEY,
      sender INT NOT NULL,
      receiver INT NOT NULL,
@@ -25,12 +25,12 @@ CREATE TABLE Messages (
 
      CONSTRAINT fk_message_sender
          FOREIGN KEY (sender)
-             REFERENCES `Users`(id)
+             REFERENCES `users`(id)
              ON DELETE CASCADE,
 
      CONSTRAINT fk_message_receiver
          FOREIGN KEY (receiver)
-             REFERENCES `Users`(id)
+             REFERENCES `users`(id)
              ON DELETE CASCADE,
 
      CONSTRAINT chk_sender_receiver_different

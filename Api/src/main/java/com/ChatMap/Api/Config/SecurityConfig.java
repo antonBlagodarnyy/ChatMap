@@ -2,6 +2,7 @@ package com.ChatMap.Api.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -23,13 +24,14 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(
-			HttpSecurity http,
-			ValidateJwtFilter validateJwtFilter) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
-
+            HttpSecurity http,
+            ValidateJwtFilter validateJwtFilter) throws Exception {
+            http
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-						.requestMatchers("/auth/**", "/health")
-						.permitAll()
+                        .requestMatchers("/auth/**", "/health")
+                        .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(validateJwtFilter, UsernamePasswordAuthenticationFilter.class)
         ;

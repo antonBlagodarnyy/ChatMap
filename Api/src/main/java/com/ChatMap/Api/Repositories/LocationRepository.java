@@ -11,10 +11,10 @@ import java.util.List;
 public interface LocationRepository extends CrudRepository<Location, Integer> {
 	 @Query(value = """
 		        SELECT *
-		        FROM location
+		        FROM locations
 		        WHERE id <> :currentUserId
 		          AND ST_Distance_Sphere(
-		                POINT(location.longitude, location.latitude),
+		                POINT(locations.longitude, locations.latitude),
 		                POINT(:lon, :lat)
 		              ) < :radius
 		        """,

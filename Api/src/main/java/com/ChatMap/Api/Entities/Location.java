@@ -18,7 +18,7 @@ public class Location {
 	@OneToOne
 	@MapsId
 	@JoinColumn(name = "id")
-	private User user;
+	private User User;
 
 	public Location() {
 		super();
@@ -55,4 +55,11 @@ public class Location {
 		this.longitude = longitude;
 	}
 
+	public User getUser() {
+		return User;
+	}
+
+	public void setUser(User user) {
+		User = user;
+	}
 }

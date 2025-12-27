@@ -2,6 +2,8 @@ package com.ChatMap.Api.Controllers;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
@@ -23,22 +25,18 @@ import com.ChatMap.Api.Services.AuthService;
 @RestController
 public class AuthController {
 
+	private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 	@Autowired
 	private AuthService authService;
 
 	@PostMapping("/signup")
 	public @ResponseBody ResponseEntity<?> registerUser(@RequestBody SignupRequest signupRequest) {
-		final String jwt = authService.saveUser(signupRequest);
-
-		return ResponseEntity.ok(Map.of("jwt", jwt));
+		return ResponseEntity.ok(authService.saveUser(signupRequest));
 	}
 
 	@PostMapping(path = "/login")
 	public @ResponseBody ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) throws Exception {
-
-		final String jwt = authService.loginUser(loginRequest);
-
-		return ResponseEntity.ok(Map.of("jwt", jwt));
+		return ResponseEntity.ok(authService.loginUser(loginRequest));
 	}
 
 

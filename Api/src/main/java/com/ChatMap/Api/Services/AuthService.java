@@ -1,5 +1,7 @@
 package com.ChatMap.Api.Services;
 
+import com.ChatMap.Api.Dto.LoginResponse;
+import com.ChatMap.Api.Dto.SignupResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,49 +19,54 @@ import com.ChatMap.Api.Repositories.UserRepository;
 @Service
 public class AuthService {
 
-	@Autowired
-	private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-	@Autowired
-	private JwtService jwtService;
+    @Autowired
+    private JwtService jwtService;
 
-	@Autowired
-	private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    public String saveUser(SignupRequest signupRequest) {
-		if (userRepository.findByEmail(signupRequest.getEmail()) != null)
-			throw new EmailAlreadyExistsException();
+    public SignupResponse saveUser(SignupRequest signupRequest) {
+        if (userRepository.findByEmail(signupRequest.email()) != null)
+            throw new EmailAlreadyExistsException();
 
-		User user = new User();
+        User user = new User(
+                signupRequest.email(),
+                passwordEncoder.encode(signupRequest.password()),
+                signupRequest.username()
+                );
 
-		user.setEmail(signupRequest.getEmail());
-		user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
+        User newUser = userRepository.save(user);
 
-		userRepository.save(user);
-
-		return jwtService.generateJwtToken(user.getId());
-	}
-
-
-	public String loginUser(LoginRequest loginRequest) {
-
-		User user = userRepository.findByEmail(loginRequest.getEmail());
-
-		if (user == null)
-			throw new NoEmailFoundException();
-
-		if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-			throw new IncorrectPasswordException();
-		}
-
-		return jwtService.generateJwtToken(user.getId());
-
-	}
+        return new SignupResponse(jwtService.generateJwtToken(
+                newUser.getId()),
+                newUser.getUsername());
+    }
 
 
-	public void deleteUser() {
-		Integer userId = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public LoginResponse loginUser(LoginRequest loginRequest) {
 
-		userRepository.deleteById(userId);
-	}
+        User user = userRepository.findByEmail(loginRequest.email());
+
+        if (user == null)
+            throw new NoEmailFoundException();
+
+        if (!passwordEncoder.matches(loginRequest.password(), user.getPassword()))
+            throw new IncorrectPasswordException();
+
+
+        return new LoginResponse(jwtService.generateJwtToken(
+                user.getId()),
+                user.getUsername());
+
+    }
+
+
+    public void deleteUser() {
+        Integer userId = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        userRepository.deleteById(userId);
+    }
 }

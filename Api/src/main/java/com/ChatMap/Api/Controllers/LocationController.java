@@ -1,8 +1,7 @@
 package com.ChatMap.Api.Controllers;
 
 
-
-import com.ChatMap.Api.Dto.CreateLocationRequest;
+import com.ChatMap.Api.Dto.UpdateLocationRequest;
 import com.ChatMap.Api.Entities.Location;
 import com.ChatMap.Api.Services.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,35 +17,38 @@ import java.util.Map;
 @RestController
 public class LocationController {
 
-	@Autowired
-	LocationService locationService;
+    @Autowired
+    LocationService locationService;
 
-	@GetMapping("/health")
-	public @ResponseBody ResponseEntity<?> health() {
-		return ResponseEntity.ok().build();
-	}
+    @GetMapping("/health")
+    public @ResponseBody ResponseEntity<?> health() {
+        return ResponseEntity.ok().build();
+    }
 
-	
-	@PostMapping("/create")
-	public @ResponseBody ResponseEntity<?> createLocation(@RequestBody CreateLocationRequest createLocationRequest) {
-		locationService.createLocation(createLocationRequest);
 
-		return ResponseEntity.ok().build();
-	}
+    @PostMapping("/update")
+    public @ResponseBody ResponseEntity<?> updateLocation(@RequestBody UpdateLocationRequest updateLocationRequest) {
+        locationService.updateLocation(updateLocationRequest);
 
-	@GetMapping("/current")
-	public ResponseEntity<?> getCurrentLocation() {
-		Location location = locationService.getCurrentLocation();
-		if (location != null)
-			return ResponseEntity.ok(Map.of("location", location));
-		else
-			return ResponseEntity.noContent().build();
-	}
+        return ResponseEntity.ok().build();
+    }
 
-	@GetMapping("/nearbyNotCurrent")
-	public @ResponseBody ResponseEntity<?> getNearbyLocation(@RequestParam Double lat, @RequestParam Double lon, @RequestParam Double radius) {
-		List<Location> locations = locationService.getNearbyLocationsNotCurrent(lat,lon, radius);
-		return ResponseEntity.ok(Map.of("locations", locations));
-	}
+    @GetMapping("/current")
+    public ResponseEntity<?> getCurrentLocation() {
+        Location location = locationService.getCurrentLocation();
+        if (location != null)
+            return ResponseEntity.ok(Map.of("location", location));
+        else
+            return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/nearbyNotCurrent")
+    public @ResponseBody ResponseEntity<?> getNearbyLocation(@RequestParam Double lat, @RequestParam Double lon, @RequestParam Double radius) {
+        return ResponseEntity.ok(
+                locationService.getNearbyLocationsNotCurrent(
+                        lat,
+                        lon,
+                        radius));
+    }
 
 }

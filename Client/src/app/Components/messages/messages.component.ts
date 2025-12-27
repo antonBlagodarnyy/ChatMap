@@ -5,13 +5,14 @@ import {
   input,
   ViewChild,
 } from '@angular/core';
-import { IMessage } from '../../Interfaces/IMessage';
+import { SavedMessage } from '../../Interfaces/SavedMessage';
 import { MatChipsModule } from '@angular/material/chips';
-import { NgClass } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
+import { signal, Signal } from '@angular/core';
 
 @Component({
   selector: 'app-messages',
-  imports: [MatChipsModule, NgClass],
+  imports: [MatChipsModule, NgClass, DatePipe],
   templateUrl: './messages.component.html',
   styleUrl: './messages.styles.css',
 })
@@ -19,7 +20,7 @@ export class MessagesComponent implements AfterViewChecked {
   @ViewChild('containerMessages')
   chatContainer!: ElementRef;
 
-  messages = input<IMessage[] | undefined>();
+  messages = input.required<Signal<SavedMessage[]>>();
   recipientName = input<string>();
 
   ngAfterViewChecked(): void {

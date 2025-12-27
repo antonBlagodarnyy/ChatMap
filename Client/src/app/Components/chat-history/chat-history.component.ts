@@ -1,9 +1,9 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { HttpCallsService } from '../../Services/http-calls.service';
 import { DatePipe, TitleCasePipe } from '@angular/common';
-import { IChatPreview } from '../../Interfaces/IChatPreview';
+import { ChatPreview } from '../../Interfaces/ChatPreview';
 import { MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { ChatService } from '../../Services/chat.service';
 
 @Component({
   selector: 'app-chat-history',
@@ -14,10 +14,10 @@ import { Router } from '@angular/router';
       <div
         class="container-chat"
         [class.even]="$index % 2 == 0"
-        (click)="openChat(chat.partnerId)"
+        (click)="openChat(chat.partnerId, chat.partnerUsername)"
       >
         <div class="container-chat-sender">
-          {{ chat.partnerName | titlecase }}
+          {{ chat.partnerUsername | titlecase }}
         </div>
         <div class="container-chat-ts">{{ chat.message.ts | date }}</div>
       </div>
@@ -48,19 +48,22 @@ import { Router } from '@angular/router';
 })
 export class ChatHistoryComponent implements OnInit {
   constructor(
-    private httpCalls: HttpCallsService,
+    private chatService: ChatService,
     private dialogRef: MatDialogRef<ChatHistoryComponent>,
     private router: Router
   ) {}
-  chats = signal<IChatPreview[]>([]);
+  chats = signal<ChatPreview[]>([]);
 
   ngOnInit(): void {
-    this.httpCalls.chatHistory$().subscribe((res) => {
-      this.chats.set(res.chats);
+    this.chatService.chatHistory$().subscribe((res) => {
+      console.log(res);
+      this.chats.set(res);
     });
   }
-  openChat(partnerId: number) {
+  openChat(partnerId: number, partnerUsername: string) {
     this.dialogRef.close();
-    this.router.navigate(['/chat', partnerId]);
+    sessionStorage.setItem('recipientId', partnerId.toString());
+    sessionStorage.setItem('recipientUsername', partnerUsername);
+    this.router.navigate(['/chat']);
   }
 }

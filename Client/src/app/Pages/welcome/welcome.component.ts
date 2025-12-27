@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {MatButtonModule} from '@angular/material/button';
-import { HealthService } from '../../Services/health.service';
 @Component({
   selector: 'app-welcome',
   imports: [RouterLink, MatButtonModule],
@@ -28,14 +27,8 @@ import { HealthService } from '../../Services/health.service';
 })
 export class WelcomeComponent implements OnInit{
   
-   constructor(private healthService: HealthService) {}
+   constructor() {}
 
   ngOnInit(): void {
-    this.healthService.openLoader();
-    this.healthService.check$().subscribe((r) => {
-      console.log(r);
-      
-    });
-    this.healthService.closeLoarder();
   }
 }

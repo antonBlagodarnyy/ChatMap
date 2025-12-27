@@ -1,7 +1,8 @@
 import { WebSocketServer, WebSocket } from "ws";
-import type { IWsMessage } from "../../Interfaces/IWsMessage.js";
+import type { UnsavedMessage } from "./Interfaces/UnsavedMessage.js";
 import jwt from "jsonwebtoken";
 import axios from "axios";
+import type { SavedMessage } from "./Interfaces/SavedMessage.js";
 
 function configWs(wss: WebSocketServer) {
   // Maps user IDs (sub from JWT) to WebSocket connections
@@ -34,14 +35,14 @@ function configWs(wss: WebSocketServer) {
     }
 
     // Handle incoming messages
-    ws.on("message", function message(data) {
+    ws.on("message", async function message(data) {
       try {
-        const parsedMsg: IWsMessage = JSON.parse(data.toString());
+        const unsavedMessage: UnsavedMessage = JSON.parse(data.toString());
 
         //Post message to db
-        axios.post(
-          `${process.env.MESSAGE_URL}/message/save`,
-          { receiver: parsedMsg.to, text: parsedMsg.msg },
+        const saveMsgRes = await axios.post<SavedMessage>(
+          `${process.env.API_URL}/message/save`,
+          unsavedMessage,
           {
             headers: {
               "Content-Type": "application/json",
@@ -50,18 +51,22 @@ function configWs(wss: WebSocketServer) {
           }
         );
 
-        const recipientWs = clients.get(parsedMsg.to);
+        const recipientWs = clients.get(saveMsgRes.data.receiver);
 
-        //Send the msg
+        //Send the msg to the receiver
         if (recipientWs && recipientWs.readyState === WebSocket.OPEN) {
           recipientWs.send(
-            JSON.stringify({
-              to: parsedMsg.to,
-              msg: parsedMsg.msg,
-            })
+            JSON.stringify(
+              saveMsgRes.data
+            )
+          );
+
+          //Return the msg to the sender
+          ws.send(
+            JSON.stringify( saveMsgRes.data)
           );
         } else {
-          console.warn(`Recipient ${parsedMsg.to} not connected.`);
+          console.warn(`Recipient ${unsavedMessage.receiver} not connected.`);
         }
       } catch (err) {
         console.error("Invalid message format", err);

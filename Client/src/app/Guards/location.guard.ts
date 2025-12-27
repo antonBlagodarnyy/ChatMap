@@ -8,22 +8,17 @@ export const locationGuard: CanActivateFn = (route, state) => {
   const locationService = inject(LocationService);
   const authService = inject(AuthService);
   const router = inject(Router);
-   return authService.user$.pipe(
+  return authService.user$.pipe(
     switchMap((u) => {
       const token = u?.token;
       if (!token) {
         // Si no hay token, redirige al inicio
         return of(router.createUrlTree(['/']));
       }
-
       // Si hay token, comprobamos la ubicación del usuario
       return locationService.currentUserLocation$().pipe(
         map((l) => {
-          if (Object.keys(l).length !== 0) {
-            return true; // Tiene ubicación
-          } else {
-            return router.createUrlTree(['/location']); // Redirigir a página de ubicación
-          }
+          return l != null ? true : router.createUrlTree(['/location']); // Redirigir a página de ubicación
         })
       );
     })

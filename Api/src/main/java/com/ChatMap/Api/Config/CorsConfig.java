@@ -7,11 +7,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
-	
-	@Value("${CLIENT_URL:http://localhost:4200}")
-	private String clientUrl;
-	@Override
-	public void addCorsMappings(CorsRegistry registry) {
-		registry.addMapping("/**").allowedOrigins(clientUrl);
-	}
+
+    @Value("${url.client}")
+    private String clientUrl;
+    @Value("${url.ws}")
+    private String wsUrl;
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**").allowedOrigins(clientUrl, wsUrl);
+    }
 }

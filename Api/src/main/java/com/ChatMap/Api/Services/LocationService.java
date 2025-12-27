@@ -1,16 +1,21 @@
 package com.ChatMap.Api.Services;
 
 
-import com.ChatMap.Api.Dto.CreateLocationRequest;
+import com.ChatMap.Api.Dto.LocationDTO;
+import com.ChatMap.Api.Dto.NearbyLocationsResponse;
+import com.ChatMap.Api.Dto.UpdateLocationRequest;
 import com.ChatMap.Api.Entities.Location;
+import com.ChatMap.Api.Entities.User;
 import com.ChatMap.Api.Models.CustomUserDetails;
 import com.ChatMap.Api.Repositories.LocationRepository;
+import com.ChatMap.Api.Repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LocationService {
@@ -18,22 +23,36 @@ public class LocationService {
     @Autowired
     LocationRepository locationRepository;
 
-    public void createLocation(CreateLocationRequest createLocationRequest) {
+    @Autowired
+    UserRepository userRepository;
+
+    @Transactional
+    public void updateLocation(UpdateLocationRequest updateLocationRequest) {
         CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
                 .getContext()
                 .getAuthentication()
                 .getPrincipal();
 
-        Location location = new Location();
-        location.setLatitude(createLocationRequest.getLatitude());
-        location.setLongitude(createLocationRequest.getLongitude());
-        location.setId(Integer.parseInt(userDetails.getUsername()));
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        locationRepository.save(location);
+        locationRepository.findById(user.getId()).ifPresentOrElse(
+                loc -> {
+                    loc.setLatitude(updateLocationRequest.latitude());
+                    loc.setLongitude(updateLocationRequest.longitude());
+                },
+                () -> {
+                    Location loc = new Location();
+                    loc.setUser(user); // ✅ sets the ID via @MapsId
+                    loc.setLatitude(updateLocationRequest.latitude());
+                    loc.setLongitude(updateLocationRequest.longitude());
+                    locationRepository.save(loc);
+                }
+        );
     }
 
     public Location getCurrentLocation() {
-        CustomUserDetails  userDetails = (CustomUserDetails) SecurityContextHolder
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
                 .getContext()
                 .getAuthentication()
                 .getPrincipal();
@@ -41,13 +60,24 @@ public class LocationService {
         return locationRepository.findById(userDetails.getId()).orElse(null);
     }
 
-    public List<Location> getNearbyLocationsNotCurrent(Double lat, Double lon, Double radius) {
-        CustomUserDetails  userDetails = (CustomUserDetails) SecurityContextHolder
+    public NearbyLocationsResponse getNearbyLocationsNotCurrent(Double lat, Double lon, Double radius) {
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
                 .getContext()
                 .getAuthentication()
                 .getPrincipal();
 
-            return locationRepository.findNearbyLocationsNotCurrent(lat,
-                    lon, radius, userDetails.getId());
+        return new NearbyLocationsResponse(
+                locationRepository.findNearbyLocationsNotCurrent(
+                                lat,
+                                lon,
+                                radius,
+                                userDetails.getId())
+                        .stream()
+                        .map(l -> new LocationDTO(
+                                l.getId(),
+                                l.getLatitude(),
+                                l.getLongitude(),
+                                l.getUser().getUsername()))
+                        .toList());
     }
 }

@@ -1,48 +1,34 @@
 import { Injectable } from '@angular/core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { AuthService } from './auth.service';
-import { BehaviorSubject, combineLatest, EMPTY, filter, switchMap } from 'rxjs';
+import { BehaviorSubject, EMPTY, switchMap, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { MatDialog } from '@angular/material/dialog';
 import { LoadingComponent } from '../Components/loading/loading.component';
-import { UserService } from './user.service';
 import { HttpClient } from '@angular/common/http';
-import { IMessage } from '../Interfaces/IMessage';
+import { SavedMessage } from '../Interfaces/SavedMessage';
+import { Message } from '../Interfaces/Mesage';
+import { ChatPreview } from '../Interfaces/ChatPreview';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ChatService {
-  private recipient = new BehaviorSubject<
-    { id: number; username: string } | undefined
-  >(undefined);
-  recipient$ = this.recipient.asObservable();
+  private messages = new BehaviorSubject<SavedMessage[]>([]);
+  messagesSubject$ = this.messages.asObservable();
+
+  receiver: { id: number; username: string } | null = null;
 
   spinnerRef: any;
   spinnerTimeout: ReturnType<typeof setTimeout> | undefined;
 
-  private wsSubject?: WebSocketSubject<any>;
+  private wsSubject?: WebSocketSubject<Message>;
 
   constructor(
     private authService: AuthService,
     private dialogRef: MatDialog,
-    private userService: UserService,
     private http: HttpClient
   ) {}
-
-  updateRecipient(recipientId: number) {
-    if (recipientId)
-      this.userService
-        .getUserDataById$(+recipientId)
-        .subscribe((u) => this.setRecipient(+recipientId, u.username));
-  }
-  setRecipient(id: number, username: string) {
-    this.recipient.next({ id, username });
-  }
-
-  getRecipient$() {
-    return this.recipient$;
-  }
 
   openLoader() {
     this.spinnerTimeout = setTimeout(() => {
@@ -53,21 +39,14 @@ export class ChatService {
   }
   connect$() {
     //Combines this recipient and current authenticated user
-    return combineLatest([
-      this.getRecipient$(),
-      this.authService.getUser$(),
-    ]).pipe(
+    return this.authService.getUser$().pipe(
       //Switches to the ws
-      switchMap(([recipient, user]) => {
+      switchMap((user) => {
         //If a user is authenticated
-        if (user) {
+        if (user && this.receiver) {
           this.wsSubject = webSocket({
             //Gets the ws url
             url: environment.wsUrl + 'messages' + '?token=' + user.token,
-            //How to process outgoing messages
-            serializer: (res) => {
-              return JSON.stringify({ to: recipient?.id, msg: res });
-            },
 
             //What to do once the connection is opened
             openObserver: {
@@ -83,18 +62,33 @@ export class ChatService {
     );
   }
 
-  sendMsg(msg: string) {
-    if (this.wsSubject) this.wsSubject.next(msg);
+  sendMsg(text: string) {
+    if (this.wsSubject && this.receiver)
+      this.wsSubject.next({
+        type: 'UNSAVED',
+        receiver: this.receiver?.id,
+        text: text,
+      });
+  }
+
+  receiveMsg(msg: SavedMessage) {
+    this.messages.next([...this.messages.value, msg]);
   }
 
   retrieveMessages$() {
-    return this.getRecipient$().pipe(
-      filter(Boolean),
-      switchMap((r) => {
-        return this.http.get<{ messages: IMessage[] }>(
-          environment.apiUrl + 'message/retrieveMessages/' + r?.id
-        );
-      })
+    return this.receiver
+      ? this.http
+          .get<{ messages: SavedMessage[] }>(
+            environment.apiUrl + 'message/retrieveMessages',
+            { params: { receiver: this.receiver.id.toString() } }
+          )
+          .pipe(tap((r) => this.messages.next(r.messages)))
+      : EMPTY;
+  }
+  
+   chatHistory$() {
+    return this.http.get<ChatPreview[]>(
+      environment.apiUrl + 'message/retrieveChats'
     );
   }
 }

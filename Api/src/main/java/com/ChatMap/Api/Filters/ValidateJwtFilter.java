@@ -69,7 +69,6 @@ public class ValidateJwtFilter extends OncePerRequestFilter {
 				throw new JWTVerificationException("No user in the jwt");
 
 			User user = userService.findUserById(Integer.parseInt(userId));
-
 			CustomUserDetails userDetails = new CustomUserDetails(user.getUsername(),user.getPassword(),user.getId());
 
 			UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(

@@ -3,20 +3,20 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
 import { BehaviorSubject, tap } from 'rxjs';
-import { IUserAuth } from '../Interfaces/IUserAuth';
+import { UserAuth } from '../Interfaces/UserAuth';
 import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private userSub$ = new BehaviorSubject<IUserAuth | null>(this.getAuthData());
+  private userSub$ = new BehaviorSubject<UserAuth | null>(this.getAuthData());
   user$ = this.userSub$.asObservable();
   private tokenTimer?: ReturnType<typeof setInterval> | null;
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  setUser(user: IUserAuth) {
+  setUser(user: UserAuth) {
     this.userSub$.next(user);
   }
   getUser$() {
@@ -26,16 +26,12 @@ export class AuthService {
     const authData = { email: email, password: password };
     return this.http
       .post<{
-        auth: { jwt: string };
-        profile: { username: string };
-      }>(environment.apiUrl + 'user/login', authData, {
-        withCredentials: true,
-      })
+        jwt: string ,
+       username: string ;
+      }>(environment.apiUrl + 'auth/login', authData, )
       .pipe(
         tap((r) => {
-          const token = r.auth.jwt;
-
-          this.processUserData(token, r.profile.username);
+          this.processUserData(r.jwt, r.username);
           this.router.navigate(['/map']);
         })
       );
@@ -43,15 +39,15 @@ export class AuthService {
 
   signin$(username: string, email: string, password: string) {
     const authData = { username: username, email: email, password: password };
+    console.log(authData);
     return this.http
       .post<{
-        auth: { jwt: string };
-        profile: { username: string };
-      }>(environment.apiUrl + 'user/create', authData)
+        jwt: string;
+        username: string;
+      }>(environment.apiUrl + 'auth/signup', authData)
       .pipe(
         tap((r) => {
-          const token = r.auth.jwt;
-          this.processUserData(token, r.profile.username);
+          this.processUserData(r.jwt, r.username);
           this.router.navigate(['/location']);
         })
       );
@@ -97,7 +93,7 @@ export class AuthService {
     localStorage.setItem('username', username);
   }
 
-  private getAuthData(): IUserAuth | null {
+  private getAuthData(): UserAuth | null {
     const token = localStorage.getItem('token');
     const expirationDateRaw = localStorage.getItem('expiration');
     const username = localStorage.getItem('username');

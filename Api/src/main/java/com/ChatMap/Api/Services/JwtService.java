@@ -45,7 +45,6 @@ public class JwtService {
 
 	public DecodedJWT decodeJwt(String token) {
 		DecodedJWT decodedJWT = null;
-
 		Algorithm algorithm = Algorithm.HMAC256(secretKey);
 		JWTVerifier verifier = JWT.require(algorithm)
 				// specify any specific claim validations

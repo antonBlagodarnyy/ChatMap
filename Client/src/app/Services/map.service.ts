@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MarkerService } from './marker.service';
 import TileLayer from 'ol/layer/Tile';
-import { combineLatest, fromEventPattern, map, switchMap } from 'rxjs';
+import { combineLatest, filter, fromEventPattern, map, switchMap } from 'rxjs';
 import View from 'ol/View';
 import Map from 'ol/Map';
 import { MatDialog } from '@angular/material/dialog';
@@ -22,11 +22,15 @@ export class MapService {
   ) {}
 
   map$() {
-    //Combines the values from the current user layer and location 
+    //Combines the values from the current user layer and location
     return combineLatest([
       this.markerService.authUserLayer$(),
       this.locationService.currentUserLocation$(),
     ]).pipe(
+      filter(
+        ([_authLayer, aLocation]) =>
+          aLocation !== null && aLocation.location !== null
+      ),
       map(([al, aLocation]) => {
         //Creates the map
         const map = new Map({
@@ -41,8 +45,8 @@ export class MapService {
           ],
           view: new View({
             center: fromLonLat([
-              aLocation.location.longitude,
-              aLocation.location.latitude,
+              aLocation.location!.longitude,
+              aLocation.location!.latitude,
             ]),
             zoom: 15,
           }),
@@ -91,7 +95,6 @@ export class MapService {
             })
           )
           .subscribe((ul) => {
-            
             // Remove old user layers, then add new one
             map.getLayers().forEach((l) => {
               if (l.get('name') === 'usersLayer') map.removeLayer(l);

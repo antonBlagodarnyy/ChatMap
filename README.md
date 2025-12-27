@@ -1,5 +1,7 @@
 # ChatMap
    
+Simple chat app that let's you find partners based on their location.
+
 ## v1.1.0
 
 ### Changes
@@ -12,4 +14,6 @@
 
 ### Features
 
-...
+1. Client signups and is asked for his location.
+2. Map is centered on users location and displays other users locations.
+3. On selecting a marker, it's possible to open a chat with that user.

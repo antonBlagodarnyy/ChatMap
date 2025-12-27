@@ -1,20 +1,19 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { ChatService } from '../../Services/chat.service';
-import { IMessage } from '../../Interfaces/IMessage';
 import { MessagesComponent } from '../../Components/messages/messages.component';
 import { InputBoxComponent } from '../../Components/messages/input-box/input-box.component';
 import { HeaderComponent } from '../../Components/header/header.component';
-import { ActivatedRoute } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-chat',
   imports: [MessagesComponent, InputBoxComponent, HeaderComponent],
   template: `
-    <app-header (currentUsername)="setCurrentUsername($event)" />
+    <app-header />
     <div class="container">
       <app-messages
-        [recipientName]="this.recipientUsername"
-        [messages]="messages()"
+        [recipientName]="this.chatService.receiver?.username"
+        [messages]="messages"
       /><app-input-box (sendMsgEvent)="sendMsg($event)" />
     </div>
   `,
@@ -33,66 +32,30 @@ import { ActivatedRoute } from '@angular/router';
   }`,
 })
 export class ChatComponent implements OnInit {
-  recipientUsername!: string;
-  senderUsername!: string;
-  messages = signal<IMessage[] | undefined>(undefined);
+  chatService = inject(ChatService);
+  messages = toSignal(this.chatService.messagesSubject$, { initialValue: [] });
+  noRecipient = signal(false);
 
-  constructor(
-    private chatService: ChatService,
-    private activatedRoute: ActivatedRoute
-  ) {}
+  constructor() {}
 
   ngOnInit(): void {
-    this.activatedRoute.paramMap.subscribe((params) => {
-      const recipientId = Number(params.get('userId'));
-      if (recipientId) this.chatService.updateRecipient(recipientId);
-    });
+    const rId = sessionStorage.getItem('recipientId');
+    const rUsername = sessionStorage.getItem('recipientUsername');
+    if (rId && rUsername) {
+      this.chatService.receiver = { id: Number(rId), username: rUsername };
+      this.chatService.openLoader();
 
-    this.chatService.openLoader();
+      this.chatService.retrieveMessages$().subscribe();
 
-    this.chatService.getRecipient$().subscribe((r) => {
-      if (r) {
-        this.recipientUsername = r.username;
-      }
-    });
-
-    this.chatService.retrieveMessages$().subscribe((res) =>
-      this.messages.set(
-        //Map of the date received from the bd since its format is different in ts
-        res.messages.map((m) => {
-          return {
-            ...m,
-            ts: new Date(m.ts).toLocaleString(),
-          };
-        })
-      )
-    );
-
-    this.chatService.connect$().subscribe((msg) => {
-      //On message received update the messages
-      this.messages.update((oldMessages) => {
-        const now = new Date().toLocaleString();
-        return oldMessages
-          ? [
-              ...oldMessages,
-              { sender: this.recipientUsername, text: msg.msg, ts: now },
-            ]
-          : [{ sender: this.recipientUsername, text: msg.msg, ts: now }];
+      this.chatService.connect$().subscribe((msg) => {
+        if (msg.type == 'SAVED') {
+          this.chatService.receiveMsg(msg);
+        }
       });
-    });
+    } else this.noRecipient.set(true);
   }
 
   sendMsg(msg: string) {
-    //Update the messages container and send it to the ws
-    this.messages.update((oldMessages) => {
-      const now = new Date().toLocaleString();
-      return oldMessages
-        ? [...oldMessages, { sender: this.senderUsername, text: msg, ts: now }]
-        : [{ sender: this.senderUsername, text: msg, ts: now }];
-    });
     this.chatService.sendMsg(msg);
-  }
-  setCurrentUsername(username: string) {
-    this.senderUsername = username;
   }
 }

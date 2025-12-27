@@ -3,7 +3,7 @@
   Chat opened with: {{ recipientName() ? recipientName() : "User unknown" }}
 </h2>
 <div class="container-messages" #containerMessages>
-  @for (msg of messages(); track $index) {
+  @for (msg of messages()(); track $index) {
 
   <!--Message-->
   <div
@@ -16,7 +16,7 @@
   >
     <div class="container-messages-message-content">
       <span class="text">{{ msg.text }}</span>
-      <span class="date">{{ msg.ts }}</span>
+      <span class="date">{{ msg.ts | date: 'medium'}}</span>
     </div>
   </div>
 

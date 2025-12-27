@@ -6,8 +6,8 @@ import VectorSource from 'ol/source/Vector';
 import Icon from 'ol/style/Icon';
 import Style from 'ol/style/Style';
 import { LocationService } from './location.service';
-import { IUserLocation } from '../Interfaces/IUserLocation';
-import { map } from 'rxjs';
+import { UserLocation } from '../Interfaces/UserLocation';
+import { filter, map } from 'rxjs';
 import { fromLonLat } from 'ol/proj';
 
 @Injectable({
@@ -17,13 +17,14 @@ export class MarkerService {
   constructor(private locationService: LocationService) {}
 
   //Casts a IUserLocation into a feature object
-  userFeature(userLocation: IUserLocation, authLocation: boolean) {
+  userFeature(userLocation: UserLocation, authLocation: boolean) {
     const userFeature = new Feature({
       geometry: new Point(
         fromLonLat([userLocation.longitude, userLocation.latitude])
       ),
       name: 'User',
       id: userLocation.id,
+      username: userLocation.username,
     });
     const userStyle = new Style({
       image: new Icon({
@@ -34,22 +35,22 @@ export class MarkerService {
     return userFeature;
   }
 
-  //First map converts the nearby locations in to features and the second in to a vector layer
+  //Converts the nearby locations in to features and  in to a vector layer
   usersLayer$(lat: number, lon: number, radius: number) {
     return this.locationService
       .getNearbyLocationsNotCurrent$(lat, lon, radius)
       .pipe(
         map((getNearbyLocationsRes) => {
-          return getNearbyLocationsRes.locations.map((l) => {
-            return this.userFeature(l, false);
-          });
-        }),
-        map((features) => {
+          const features = getNearbyLocationsRes.locations.map((l) =>
+            this.userFeature(l, false)
+          );
           const vectorSource = new VectorSource({
             features: features,
           });
-          return new VectorLayer({ source: vectorSource,
-          properties: { name: 'usersLayer' }, });
+          return new VectorLayer({
+            source: vectorSource,
+            properties: { name: 'usersLayer' },
+          });
         })
       );
   }
@@ -57,12 +58,11 @@ export class MarkerService {
   //First map converts the authenticated location in to a feature and the second in to a vector layer
   authUserLayer$() {
     return this.locationService.currentUserLocation$().pipe(
-      map((currentUserLocationRes) => {
-        return this.userFeature(currentUserLocationRes.location, true);
-      }),
-      map((features) => {
+      filter((res) => res !== null),
+      map((res) => this.userFeature(res.location!, true)),
+      map((feature) => {
         const vectorSource = new VectorSource({
-          features: [features],
+          features: [feature],
         });
         return new VectorLayer({
           source: vectorSource,

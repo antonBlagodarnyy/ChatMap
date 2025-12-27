@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { IUserLocation } from '../Interfaces/IUserLocation';
-import { AuthService } from './auth.service';
-import { EMPTY, from } from 'rxjs';
+import { UserLocation } from '../Interfaces/UserLocation';
+
+import { from } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -27,8 +27,8 @@ export class LocationService {
   }
 
   postUsersLocation$(lat: number, lon: number) {
-    return this.http.post<IUserLocation>(
-      environment.apiUrl + 'location/create',
+    return this.http.post<UserLocation>(
+      environment.apiUrl + 'location/update',
       {
         latitude: lat,
         longitude: lon,
@@ -37,17 +37,23 @@ export class LocationService {
   }
 
   getNearbyLocationsNotCurrent$(lat: number, lon: number, radius: number) {
-    return this.http.get<{ locations: IUserLocation[] }>(
-      `${environment.apiUrl}location/nearbyNotCurrent/${lat}/${lon}/${radius}`
+    const params = new HttpParams()
+      .set('lat', lat.toString())
+      .set('lon', lon.toString())
+      .set('radius', radius.toString());
+
+    return this.http.get<{ locations: UserLocation[] }>(
+      `${environment.apiUrl}location/nearbyNotCurrent`,
+      { params }
     );
   }
   getLocationById$(id: number) {
-    return this.http.get<IUserLocation>(
+    return this.http.get<UserLocation>(
       environment.apiUrl + 'userslocations/byUser/' + id
     );
   }
   currentUserLocation$() {
-    return this.http.get<{ location: IUserLocation }>(
+    return this.http.get<{ location: UserLocation | null }>(
       environment.apiUrl + 'location/current'
     );
   }
