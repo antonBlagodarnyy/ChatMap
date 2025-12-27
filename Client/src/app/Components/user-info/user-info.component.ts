@@ -2,6 +2,7 @@ import { Component, inject, Inject, OnInit } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
+  MatDialogContent,
   MatDialogRef,
   MatDialogTitle,
 } from '@angular/material/dialog';
@@ -12,12 +13,12 @@ import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-user-info',
-  imports: [MatDialogTitle, MatDialogActions, MatChipsModule, MatButtonModule],
+  imports: [MatDialogTitle, MatDialogActions, MatChipsModule, MatButtonModule, MatDialogContent],
   template: `<h1 mat-dialog-title>Usuario: {{ data.featureData.username }}</h1>
-    <!--TODO add more user data-->
-    <!--     <mat-dialog-content>
-      {{ user?.username }}
-    </mat-dialog-content> -->
+
+       <mat-dialog-content>
+      {{ data.featureData.address }}
+    </mat-dialog-content> 
     <mat-dialog-actions>
       <button mat-button (click)="openChat()">Chat</button></mat-dialog-actions
     >`,
@@ -28,12 +29,12 @@ export class UserInfoComponent {
     private userService: UserService,
     private router: Router
   ) {}
-  data = inject<{ featureData: { id: number; username: string } }>(
+  data = inject<{ featureData: { id: number; username: string , address:string} }>(
     MAT_DIALOG_DATA
   );
 
   openChat() {
-    const { id, username } = this.data.featureData;
+    const { id, username, address } = this.data.featureData;
     if (id && username) {
       this.dialogRef.close();
       sessionStorage.setItem('recipientId', id.toString());

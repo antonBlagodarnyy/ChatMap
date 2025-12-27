@@ -25,6 +25,7 @@ export class MarkerService {
       name: 'User',
       id: userLocation.id,
       username: userLocation.username,
+      address: userLocation.address,
     });
     const userStyle = new Style({
       image: new Icon({

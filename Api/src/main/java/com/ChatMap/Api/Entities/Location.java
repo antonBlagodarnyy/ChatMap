@@ -15,6 +15,9 @@ public class Location {
 	@Column(nullable = false)
 	private Double longitude;
 
+	@Column(nullable = false)
+	private String address;
+
 	@OneToOne
 	@MapsId
 	@JoinColumn(name = "id")
@@ -24,16 +27,19 @@ public class Location {
 		super();
 	}
 
-	public Location(Integer id, Double latitude, Double longitude) {
+	public Location(Integer id, Double latitude, Double longitude, String address) {
 		super();
 		this.id = id;
 		this.latitude = latitude;
 		this.longitude = longitude;
+		this.address = address;
 	}
 
 	public Integer getId() {
 		return id;
 	}
+
+
 
 	public void setId(Integer id) {
 		this.id = id;
@@ -55,6 +61,13 @@ public class Location {
 		this.longitude = longitude;
 	}
 
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
 	public User getUser() {
 		return User;
 	}

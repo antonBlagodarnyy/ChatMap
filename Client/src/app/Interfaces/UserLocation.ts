@@ -3,4 +3,5 @@ export interface UserLocation {
   username: string;
   latitude: number;
   longitude: number;
+  address:string;
 }

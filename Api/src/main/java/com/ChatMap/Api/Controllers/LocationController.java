@@ -1,6 +1,7 @@
 package com.ChatMap.Api.Controllers;
 
 
+import com.ChatMap.Api.Dto.LocationDTO;
 import com.ChatMap.Api.Dto.UpdateLocationRequest;
 import com.ChatMap.Api.Entities.Location;
 import com.ChatMap.Api.Services.LocationService;
@@ -35,7 +36,7 @@ public class LocationController {
 
     @GetMapping("/current")
     public ResponseEntity<?> getCurrentLocation() {
-        Location location = locationService.getCurrentLocation();
+        LocationDTO location = locationService.getCurrentLocation();
         if (location != null)
             return ResponseEntity.ok(Map.of("location", location));
         else
