@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import http from "http";
 import { WebSocketServer } from "ws";
-import configWs from "./webSocketConnection.js";
+import configWsChat from "./webSocketConnection.js";
 
 
 //General config
@@ -25,9 +25,12 @@ app.use(
 
 //Ws config
 const server = http.createServer(app);
-const wss = new WebSocketServer({ server, path: "/messages" });
 
-configWs(wss);
+const wssChat = new WebSocketServer({ server, path: "/messages" });
+configWsChat(wssChat);
+
+//const wssNewMessages = new WebSocketServer({ server, path: "/newMessages" });
+//configWsNewMessages(wssNewMessages);
 
 //Run endpoints
 server.listen(port, () => {

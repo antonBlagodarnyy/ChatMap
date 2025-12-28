@@ -91,7 +91,14 @@ public class MessageService {
                     User partner = m.getSender().equals(currentUser)
                             ? m.getReceiver()
                             : m.getSender();
-                    return new ChatPreviewResponse(partner.getUsername(), partner.getId(), new MessageDTO(m.getSender().getUsername(),m.getReceiver().getId(),m.getText(),m.getTs()));
+                    return new ChatPreviewResponse(
+                            partner.getUsername(),
+                            partner.getId(),
+                            new MessageDTO(
+                                    m.getSender().getUsername(),
+                                    m.getReceiver().getId(),
+                                    m.getText(),
+                                    m.getTs()));
                 })
                 .collect(Collectors.toList());
     }

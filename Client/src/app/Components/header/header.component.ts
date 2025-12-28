@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ChatHistoryComponent } from '../chat-history/chat-history.component';
+import { UserListComponent } from '../user-list/user-list.component';
 
 @Component({
   selector: 'app-header',
@@ -12,6 +13,7 @@ import { ChatHistoryComponent } from '../chat-history/chat-history.component';
   template: `<div class="container">
     <h2>{{ user?.username }}</h2>
     <button mat-raised-button (click)="openChatHistory()">Chats</button>
+    <button mat-raised-button (click)="openUsers()">Users</button>
     <a routerLink="/map" mat-button routerLinkActive="router-link-active"
       >Map</a
     >
@@ -43,5 +45,8 @@ export class HeaderComponent implements OnInit {
   }
   openChatHistory() {
     this.dialogRef.open(ChatHistoryComponent);
+  }
+   openUsers() {
+    this.dialogRef.open(UserListComponent);
   }
 }

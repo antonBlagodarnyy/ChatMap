@@ -3,26 +3,53 @@ import {
   Component,
   ElementRef,
   input,
+  OnInit,
   ViewChild,
 } from '@angular/core';
 import { SavedMessage } from '../../Interfaces/SavedMessage';
 import { MatChipsModule } from '@angular/material/chips';
 import { DatePipe, NgClass } from '@angular/common';
-import { signal, Signal } from '@angular/core';
+import { Signal } from '@angular/core';
 
 @Component({
   selector: 'app-messages',
   imports: [MatChipsModule, NgClass, DatePipe],
-  templateUrl: './messages.component.html',
+  template: `<!--Header for the chat-->
+    <h2>Chat opened with: {{ recipient()()?.username ?? 'User unknown' }}</h2>
+    <div class="container-messages" #containerMessages>
+      @for (msg of messages()(); track $index) {
+
+      <!--Message-->
+      <div
+        class="container-messages-message"
+        [ngClass]="
+          recipient()()?.username == msg.sender
+            ? 'container-messages-message-received'
+            : 'container-messages-message-sent'
+        "
+      >
+        <div class="container-messages-message-content">
+          <span class="text">{{ msg.text }}</span>
+          <span class="date">{{ msg.ts | date : 'medium' }}</span>
+        </div>
+      </div>
+
+      }
+    </div>`,
   styleUrl: './messages.styles.css',
 })
-export class MessagesComponent implements AfterViewChecked {
+export class MessagesComponent implements AfterViewChecked , OnInit{
+  
   @ViewChild('containerMessages')
   chatContainer!: ElementRef;
 
   messages = input.required<Signal<SavedMessage[]>>();
-  recipientName = input<string>();
+  recipient = input.required<Signal<{ id: number; username: string } | null>>();
 
+  ngOnInit(): void {
+    console.log(this.recipient()());
+  }
+   
   ngAfterViewChecked(): void {
     this.chatContainer.nativeElement.scrollTop =
       this.chatContainer.nativeElement.scrollHeight;

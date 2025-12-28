@@ -12,7 +12,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
     <app-header />
     <div class="container">
       <app-messages
-        [recipientName]="this.chatService.receiver?.username"
+        [recipient]="receiver"
         [messages]="messages"
       /><app-input-box (sendMsgEvent)="sendMsg($event)" />
     </div>
@@ -34,25 +34,24 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class ChatComponent implements OnInit {
   chatService = inject(ChatService);
   messages = toSignal(this.chatService.messagesSubject$, { initialValue: [] });
-  noRecipient = signal(false);
-
+  receiver = toSignal(this.chatService.receiver$,{initialValue:null})
   constructor() {}
 
   ngOnInit(): void {
-    const rId = sessionStorage.getItem('recipientId');
-    const rUsername = sessionStorage.getItem('recipientUsername');
-    if (rId && rUsername) {
-      this.chatService.receiver = { id: Number(rId), username: rUsername };
-      this.chatService.openLoader();
+    this.chatService.receiver$.subscribe((r) => {
+      this.chatService.disconnect();
+      if (r) {
+        this.chatService.openLoader();
 
-      this.chatService.retrieveMessages$().subscribe();
+        this.chatService.retrieveMessages$().subscribe();
 
-      this.chatService.connect$().subscribe((msg) => {
-        if (msg.type == 'SAVED') {
-          this.chatService.receiveMsg(msg);
-        }
-      });
-    } else this.noRecipient.set(true);
+        this.chatService.connect$().subscribe((msg) => {
+          if (msg.type == 'SAVED') {
+            this.chatService.receiveMsg(msg);
+          }
+        });
+      };
+    });
   }
 
   sendMsg(msg: string) {

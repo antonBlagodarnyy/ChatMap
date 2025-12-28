@@ -17,7 +17,31 @@ export class ChatService {
   private messages = new BehaviorSubject<SavedMessage[]>([]);
   messagesSubject$ = this.messages.asObservable();
 
-  receiver: { id: number; username: string } | null = null;
+  private receiverSubject = new BehaviorSubject<{
+    id: number;
+    username: string;
+  } | null>(this.loadFromSession());
+  receiver$ = this.receiverSubject.asObservable();
+
+  setReceiver(id: number, username: string) {
+    const receiver = { id, username };
+    sessionStorage.setItem('receiver', JSON.stringify(receiver));
+    this.receiverSubject.next(receiver);
+  }
+
+  getReceiver() {
+    return this.receiverSubject.value;
+  }
+
+  clearRecipient() {
+    sessionStorage.removeItem('receiver');
+    this.receiverSubject.next(null);
+  }
+
+  private loadFromSession() {
+    const raw = sessionStorage.getItem('receiver');
+    return raw ? JSON.parse(raw) : null;
+  }
 
   spinnerRef: any;
   spinnerTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -43,7 +67,7 @@ export class ChatService {
       //Switches to the ws
       switchMap((user) => {
         //If a user is authenticated
-        if (user && this.receiver) {
+        if (user && this.getReceiver()) {
           this.wsSubject = webSocket({
             //Gets the ws url
             url: environment.wsUrl + 'messages',
@@ -67,11 +91,17 @@ export class ChatService {
     );
   }
 
+  disconnect(){
+    if(this.wsSubject)
+      this.wsSubject.complete();
+  }
+
   sendMsg(text: string) {
-    if (this.wsSubject && this.receiver)
+    const receiverId = this.getReceiver()?.id;
+    if (this.wsSubject && receiverId)
       this.wsSubject.next({
         type: 'UNSAVED',
-        receiver: this.receiver?.id,
+        receiver: receiverId,
         text: text,
       });
   }
@@ -81,11 +111,12 @@ export class ChatService {
   }
 
   retrieveMessages$() {
-    return this.receiver
+    const receiverId = this.getReceiver()?.id;
+    return receiverId
       ? this.http
           .get<{ messages: SavedMessage[] }>(
             environment.apiUrl + 'message/retrieveMessages',
-            { params: { receiver: this.receiver.id.toString() } }
+            { params: { receiver: receiverId.toString() } }
           )
           .pipe(tap((r) => this.messages.next(r.messages)))
       : EMPTY;

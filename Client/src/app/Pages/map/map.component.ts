@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { HeaderComponent } from '../../Components/header/header.component';
 import Map from 'ol/Map.js';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,13 +11,14 @@ import { MapService } from '../../Services/map.service';
     <div id="map" style="width: 100%; height: 85%"></div>`,
 })
 export class MapComponent implements OnInit {
-  map?: Map;
+  mapService = inject(MapService);
+  map? = this.mapService.map;
 
-  constructor(private mapService: MapService) {}
+  constructor() {}
 
   ngOnInit() {
     this.mapService.map$().subscribe((m) => {
-      this.map = m;
+      this.mapService.map = m;
     });
   }
 }

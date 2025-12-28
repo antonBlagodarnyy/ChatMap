@@ -21,6 +21,8 @@ export class MapService {
     private dialogRef: MatDialog
   ) {}
 
+  map?: Map;
+
   map$() {
     //Combines the values from the current user layer and location
     return combineLatest([
@@ -106,6 +108,18 @@ export class MapService {
       })
     );
   }
+
+  setMapCenter(lat: number, lon: number) {
+    const view = this.map?.getView();
+    if (!view) return;
+
+    view.animate({
+      center: fromLonLat([lon, lat]),
+      zoom: 15,
+      duration: 600,
+    });
+  }
+
   private layerFilter = (l: Layer) => {
     return l.get('name') != 'authUserLayer';
   };

@@ -10,35 +10,42 @@ import { UserService } from '../../Services/user.service';
 import { MatChipsModule } from '@angular/material/chips';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { ChatService } from '../../Services/chat.service';
 
 @Component({
   selector: 'app-user-info',
-  imports: [MatDialogTitle, MatDialogActions, MatChipsModule, MatButtonModule, MatDialogContent],
+  imports: [
+    MatDialogTitle,
+    MatDialogActions,
+    MatChipsModule,
+    MatButtonModule,
+    MatDialogContent,
+  ],
   template: `<h1 mat-dialog-title>Usuario: {{ data.featureData.username }}</h1>
 
-       <mat-dialog-content>
+    <mat-dialog-content>
       {{ data.featureData.address }}
-    </mat-dialog-content> 
+    </mat-dialog-content>
     <mat-dialog-actions>
       <button mat-button (click)="openChat()">Chat</button></mat-dialog-actions
     >`,
 })
 export class UserInfoComponent {
+  private chatService = inject(ChatService);
+
   constructor(
     private dialogRef: MatDialogRef<UserInfoComponent>,
-    private userService: UserService,
     private router: Router
   ) {}
-  data = inject<{ featureData: { id: number; username: string , address:string} }>(
-    MAT_DIALOG_DATA
-  );
+  data = inject<{
+    featureData: { id: number; username: string; address: string };
+  }>(MAT_DIALOG_DATA);
 
   openChat() {
-    const { id, username, address } = this.data.featureData;
+    const { id, username } = this.data.featureData;
     if (id && username) {
       this.dialogRef.close();
-      sessionStorage.setItem('recipientId', id.toString());
-      sessionStorage.setItem('recipientUsername', username);
+      this.chatService.setReceiver(id, username);
 
       this.router.navigate(['/chat']);
     }
