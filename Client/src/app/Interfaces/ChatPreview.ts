@@ -1,7 +1,9 @@
-import { SavedMessage } from "./SavedMessage";
+import { MessageInfo } from './MessageInfo';
+
 
 export interface ChatPreview {
-  message: SavedMessage;
+  message: MessageInfo;
+  partnerId: number;
   partnerUsername: string;
-  partnerId: number
+  unreadCount: number;
 }

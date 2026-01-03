@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ChatService } from '../../Services/chat.service';
 import { MessagesComponent } from '../../Components/messages/messages.component';
 import { InputBoxComponent } from '../../Components/messages/input-box/input-box.component';
@@ -31,27 +31,34 @@ import { toSignal } from '@angular/core/rxjs-interop';
     width:90%;
   }`,
 })
-export class ChatComponent implements OnInit {
+export class ChatComponent implements OnInit, OnDestroy {
   chatService = inject(ChatService);
   messages = toSignal(this.chatService.messagesSubject$, { initialValue: [] });
-  receiver = toSignal(this.chatService.receiver$,{initialValue:null})
+  receiver = toSignal(this.chatService.partner$, { initialValue: null });
   constructor() {}
 
   ngOnInit(): void {
-    this.chatService.receiver$.subscribe((r) => {
-      this.chatService.disconnect();
-      if (r) {
-        this.chatService.openLoader();
-
-        this.chatService.retrieveMessages$().subscribe();
-
-        this.chatService.connect$().subscribe((msg) => {
-          if (msg.type == 'SAVED') {
-            this.chatService.receiveMsg(msg);
-          }
-        });
-      };
+    this.chatService.partner$.subscribe(() => {
+      this.chatService.clearChat();
+      this.chatService.retrieveMessages$().subscribe();
     });
+
+    this.chatService.messagesSubject$.subscribe((messages) => {
+      const partner = this.chatService.getPartner();
+      if (!partner) return;
+
+      const hasUnread = messages.some((m) => {
+        return !m.message.isRead && m.message.receiverId !== partner.id;
+      });
+
+      if (hasUnread) {
+        this.chatService.readMessages$().subscribe();
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.chatService.clearParnter();
   }
 
   sendMsg(msg: string) {

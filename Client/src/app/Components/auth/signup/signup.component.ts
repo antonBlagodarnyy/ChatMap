@@ -7,9 +7,10 @@ import {
   Validators,
 } from '@angular/forms';
 import { AuthService } from '../../../Services/auth.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatError, MatInputModule, MatLabel } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-signup',
@@ -19,6 +20,8 @@ import { MatButtonModule } from '@angular/material/button';
     MatLabel,
     MatButtonModule,
     MatError,
+    MatIconModule,
+    RouterLink
   ],
   templateUrl: './signup.component.html',
   styleUrl: '../auth.styles.css',

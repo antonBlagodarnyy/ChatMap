@@ -1,47 +1,31 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { AuthService } from './auth.service';
-import { BehaviorSubject, EMPTY, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, EMPTY, map, switchMap, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { MatDialog } from '@angular/material/dialog';
 import { LoadingComponent } from '../Components/loading/loading.component';
 import { HttpClient } from '@angular/common/http';
 import { SavedMessage } from '../Interfaces/SavedMessage';
 import { Message } from '../Interfaces/Mesage';
-import { ChatPreview } from '../Interfaces/ChatPreview';
+import { ChatHistoryService } from './chat-history.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ChatService {
+  chatHistoryService = inject(ChatHistoryService);
+
+  currentUserId: number | undefined;
+
   private messages = new BehaviorSubject<SavedMessage[]>([]);
   messagesSubject$ = this.messages.asObservable();
 
-  private receiverSubject = new BehaviorSubject<{
+  private partnerSubject = new BehaviorSubject<{
     id: number;
     username: string;
   } | null>(this.loadFromSession());
-  receiver$ = this.receiverSubject.asObservable();
-
-  setReceiver(id: number, username: string) {
-    const receiver = { id, username };
-    sessionStorage.setItem('receiver', JSON.stringify(receiver));
-    this.receiverSubject.next(receiver);
-  }
-
-  getReceiver() {
-    return this.receiverSubject.value;
-  }
-
-  clearRecipient() {
-    sessionStorage.removeItem('receiver');
-    this.receiverSubject.next(null);
-  }
-
-  private loadFromSession() {
-    const raw = sessionStorage.getItem('receiver');
-    return raw ? JSON.parse(raw) : null;
-  }
+  partner$ = this.partnerSubject.asObservable();
 
   spinnerRef: any;
   spinnerTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -54,6 +38,26 @@ export class ChatService {
     private http: HttpClient
   ) {}
 
+  setPartner(id: number, username: string) {
+    const receiver = { id, username };
+    sessionStorage.setItem('partner', JSON.stringify(receiver));
+    this.partnerSubject.next(receiver);
+  }
+
+  getPartner() {
+    return this.partnerSubject.value;
+  }
+
+  clearParnter() {
+    sessionStorage.removeItem('partner');
+    this.partnerSubject.next(null);
+  }
+
+  private loadFromSession() {
+    const raw = sessionStorage.getItem('partner');
+    return raw ? JSON.parse(raw) : null;
+  }
+
   openLoader() {
     this.spinnerTimeout = setTimeout(() => {
       this.spinnerRef = this.dialogRef.open(LoadingComponent, {
@@ -62,12 +66,11 @@ export class ChatService {
     }, 300);
   }
   connect$() {
-    //Combines this recipient and current authenticated user
     return this.authService.getUser$().pipe(
       //Switches to the ws
       switchMap((user) => {
         //If a user is authenticated
-        if (user && this.getReceiver()) {
+        if (user) {
           this.wsSubject = webSocket({
             //Gets the ws url
             url: environment.wsUrl + 'messages',
@@ -91,13 +94,12 @@ export class ChatService {
     );
   }
 
-  disconnect(){
-    if(this.wsSubject)
-      this.wsSubject.complete();
+  disconnect() {
+    if (this.wsSubject) this.wsSubject.complete();
   }
 
   sendMsg(text: string) {
-    const receiverId = this.getReceiver()?.id;
+    const receiverId = this.getPartner()?.id;
     if (this.wsSubject && receiverId)
       this.wsSubject.next({
         type: 'UNSAVED',
@@ -106,25 +108,63 @@ export class ChatService {
       });
   }
 
-  receiveMsg(msg: SavedMessage) {
-    this.messages.next([...this.messages.value, msg]);
+  receiveMsg$(msg: SavedMessage) {
+    const belongsToConver =
+      msg.message.senderId == this.getPartner()?.id ||
+      msg.message.receiverId == this.getPartner()?.id;
+
+    if (belongsToConver)
+      this.messages.next([
+        ...this.messages.value,
+        {
+          ...msg,
+          message: {
+            ...msg.message,
+            isSentByCurrentUser: this.currentUserId === msg.message.senderId,
+          },
+        },
+      ]);
   }
 
   retrieveMessages$() {
-    const receiverId = this.getReceiver()?.id;
-    return receiverId
+    const partnerId = this.getPartner()?.id;
+    return partnerId
       ? this.http
           .get<{ messages: SavedMessage[] }>(
             environment.apiUrl + 'message/retrieveMessages',
-            { params: { receiver: receiverId.toString() } }
+            { params: { receiver: partnerId.toString() } }
           )
-          .pipe(tap((r) => this.messages.next(r.messages)))
+          .pipe(
+            map((r) =>
+              r.messages.map((m) => {
+                return {
+                  ...m,
+                  message: {
+                    ...m.message,
+                    isSentByCurrentUser:
+                      this.currentUserId === m.message.senderId,
+                  },
+                };
+              })
+            ),
+            tap((messages) => {
+              this.messages.next(messages);
+            })
+          )
       : EMPTY;
   }
 
-  chatHistory$() {
-    return this.http.get<ChatPreview[]>(
-      environment.apiUrl + 'message/retrieveChats'
-    );
+  readMessages$() {
+    const partnerId = this.getPartner()?.id;
+    return partnerId
+      ? this.http
+          .post(environment.apiUrl + 'message/read', partnerId)
+          .pipe(
+            tap(() => this.chatHistoryService.readChat(this.getPartner()?.id))
+          )
+      : EMPTY;
+  }
+  clearChat(){
+    this.messages.next([]);
   }
 }

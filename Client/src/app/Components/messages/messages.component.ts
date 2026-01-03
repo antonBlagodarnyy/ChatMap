@@ -3,7 +3,6 @@ import {
   Component,
   ElementRef,
   input,
-  OnInit,
   ViewChild,
 } from '@angular/core';
 import { SavedMessage } from '../../Interfaces/SavedMessage';
@@ -23,14 +22,14 @@ import { Signal } from '@angular/core';
       <div
         class="container-messages-message"
         [ngClass]="
-          recipient()()?.username == msg.sender
+          !msg.message.isSentByCurrentUser
             ? 'container-messages-message-received'
             : 'container-messages-message-sent'
         "
       >
         <div class="container-messages-message-content">
-          <span class="text">{{ msg.text }}</span>
-          <span class="date">{{ msg.ts | date : 'medium' }}</span>
+          <span class="text">{{ msg.message.text }}</span>
+          <span class="date">{{ msg.message.ts | date : 'medium' }}</span>
         </div>
       </div>
 
@@ -38,7 +37,7 @@ import { Signal } from '@angular/core';
     </div>`,
   styleUrl: './messages.styles.css',
 })
-export class MessagesComponent implements AfterViewChecked , OnInit{
+export class MessagesComponent implements AfterViewChecked {
   
   @ViewChild('containerMessages')
   chatContainer!: ElementRef;
@@ -46,9 +45,6 @@ export class MessagesComponent implements AfterViewChecked , OnInit{
   messages = input.required<Signal<SavedMessage[]>>();
   recipient = input.required<Signal<{ id: number; username: string } | null>>();
 
-  ngOnInit(): void {
-    console.log(this.recipient()());
-  }
    
   ngAfterViewChecked(): void {
     this.chatContainer.nativeElement.scrollTop =

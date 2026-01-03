@@ -45,7 +45,7 @@ export class UserInfoComponent {
     const { id, username } = this.data.featureData;
     if (id && username) {
       this.dialogRef.close();
-      this.chatService.setReceiver(id, username);
+      this.chatService.setPartner(id, username);
 
       this.router.navigate(['/chat']);
     }

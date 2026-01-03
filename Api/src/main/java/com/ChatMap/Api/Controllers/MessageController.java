@@ -28,6 +28,12 @@ public class MessageController {
         return ResponseEntity.ok(messageService.saveMessage(saveMessageRequest));
     }
 
+    @PostMapping("/read")
+    public @ResponseBody ResponseEntity<?> readMessage(@RequestBody Integer partnerId) {
+        messageService.markMessagesAsRead(partnerId);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/retrieveMessages")
     public @ResponseBody ResponseEntity<?> retrieveMessages(@RequestParam Integer receiver) {
         return ResponseEntity.ok(messageService.retrieveMessages(receiver));

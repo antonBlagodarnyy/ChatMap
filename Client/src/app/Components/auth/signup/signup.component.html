@@ -1,18 +1,20 @@
+<a mat-raised-button [routerLink]="['/auth/login']">Login</a>
+
 <div class="container">
   <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-    <mat-form-field>
+    <mat-form-field appearance="outline">
       <mat-label>User name:</mat-label>
       <input matInput id="userName" type="text" formControlName="userName" />
-        <mat-error>User name is required.</mat-error>
+      <mat-error>User name is required.</mat-error>
     </mat-form-field>
 
-    <mat-form-field>
+    <mat-form-field appearance="outline">
       <mat-label>Email:</mat-label>
       <input matInput id="email" type="text" formControlName="email" />
 
       <mat-error> This must be a valid email. </mat-error>
     </mat-form-field>
-    <mat-form-field>
+    <mat-form-field appearance="outline">
       <mat-label>Password:</mat-label>
       <input
         matInput
@@ -21,7 +23,7 @@
         formControlName="password"
       />
     </mat-form-field>
-    <mat-form-field>
+    <mat-form-field appearance="outline">
       <mat-label>Confirm password:</mat-label>
       <input
         matInput
@@ -31,6 +33,8 @@
       />
       <mat-error> Passwords must match.</mat-error>
     </mat-form-field>
-    <button mat-raised-button type="submit">Registrar</button>
+    <button mat-fab extended type="submit">
+      <mat-icon>how_to_reg</mat-icon>Signup
+    </button>
   </form>
 </div>

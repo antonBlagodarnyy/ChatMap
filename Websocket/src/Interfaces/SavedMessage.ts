@@ -1,9 +1,14 @@
 import type { BaseMessage } from "./Message.js";
 
-export interface SavedMessage extends BaseMessage{
+export interface SavedMessage extends BaseMessage {
   type: "SAVED";
-  sender: string;
-  receiver: number;
-  text: string;
-  ts: string;
+  message: {
+    sender: string;
+    senderId: number;
+    receiver:string;
+    receiverId: number;
+    isRead: boolean;
+    text: string;
+    ts: string;
+  };
 }

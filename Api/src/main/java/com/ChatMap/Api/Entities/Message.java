@@ -30,6 +30,9 @@ public class Message {
     @JoinColumn(name = "receiver", nullable = false)
     private User receiver;
 
+    @Column(nullable = false)
+    private boolean isRead = false;
+
     public Message() {
         super();
     }
@@ -38,7 +41,6 @@ public class Message {
         super();
         this.sender = sender;
         this.receiver = receiver;
-
         this.text = text;
 
     }
@@ -83,4 +85,11 @@ public class Message {
         this.ts = ts;
     }
 
+    public boolean isRead() {
+        return isRead;
+    }
+
+    public void setRead(boolean read) {
+        isRead = read;
+    }
 }

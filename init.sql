@@ -25,6 +25,7 @@ CREATE TABLE messages
     sender   INT       NOT NULL,
     receiver INT       NOT NULL,
     text     TEXT      NOT NULL,
+    is_read   BOOLEAN   NOT NULL DEFAULT FALSE,
     ts       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_message_sender

@@ -8,8 +8,9 @@ import {
   Validators,
 } from '@angular/forms';
 import { AuthService } from '../../../Services/auth.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-login',
@@ -18,6 +19,8 @@ import { MatButtonModule } from '@angular/material/button';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
+    MatIconModule,
+    RouterLink
   ],
   templateUrl: './login.component.html',
   styleUrl: './../auth.styles.css',

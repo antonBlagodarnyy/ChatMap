@@ -7,10 +7,10 @@ import type { ConnectionMessage } from "./Interfaces/ConnectionMessage.js";
 import type { Message } from "./Interfaces/Message.js";
 import type { AuthWebSocket } from "./Interfaces/AuthWebsocket.js";
 
-function configWs(wss: WebSocketServer) {
-  // Maps user IDs (sub from JWT) to WebSocket connections
-  const clients = new Map<number, WebSocket>();
+// Maps user IDs (sub from JWT) to WebSocket connections
+const connectedUsers = new Map<number, AuthWebSocket>();
 
+function configWs(wss: WebSocketServer) {
   wss.on("connection", function connection(ws, req) {
     const authWebSocket = ws as AuthWebSocket;
 
@@ -19,26 +19,22 @@ function configWs(wss: WebSocketServer) {
       const message: Message = JSON.parse(data.toString());
 
       if (message.type === "CONNECTION") {
-        handleConnection(message, authWebSocket, clients);
+        handleConnection(message, authWebSocket);
       } else if (message.type === "UNSAVED") {
-        handleUnsavedMessage(message, authWebSocket, clients);
+        handleUnsavedMessage(message, authWebSocket);
       }
     });
 
     ws.on("close", () => {
       if (authWebSocket.userId) {
-        clients.delete(authWebSocket.userId);
+        connectedUsers.delete(authWebSocket.userId);
         console.log(`User ${authWebSocket.userId} disconnected`);
       }
     });
   });
 }
 
-function handleConnection(
-  message: ConnectionMessage,
-  ws: AuthWebSocket,
-  clients: Map<number, WebSocket>
-) {
+function handleConnection(message: ConnectionMessage, ws: AuthWebSocket) {
   if (!message.token) {
     console.error("Missing token");
     ws.close();
@@ -51,7 +47,7 @@ function handleConnection(
 
     if (decoded.sub) {
       // Save this user's WebSocket connection
-      clients.set(+decoded.sub, ws);
+      connectedUsers.set(+decoded.sub, ws);
 
       // Store user info on the socket for later use
       ws.token = message.token;
@@ -65,8 +61,7 @@ function handleConnection(
 
 async function handleUnsavedMessage(
   message: UnsavedMessage,
-  ws: AuthWebSocket,
-  clients: Map<number, WebSocket>
+  ws: AuthWebSocket
 ) {
   try {
     //Post message to db
@@ -85,9 +80,11 @@ async function handleUnsavedMessage(
     ws.send(JSON.stringify(saveMsgRes.data));
 
     //Send the msg to the receiver
-    const recipientWs = clients.get(saveMsgRes.data.receiver);
+    const recipientWs = connectedUsers.get(saveMsgRes.data.message.receiverId);
     if (recipientWs && recipientWs.readyState === WebSocket.OPEN) {
+      console.log(recipientWs.userId)
       recipientWs.send(JSON.stringify(saveMsgRes.data));
+      
     } else {
       console.warn(`Recipient ${message.receiver} not connected.`);
     }

@@ -2,6 +2,6 @@ export interface User {
   id: number;
   username: string;
   address: string;
-  lat: number;
-  lon: number;
+  lat: number | null;
+  lon: number | null;
 }

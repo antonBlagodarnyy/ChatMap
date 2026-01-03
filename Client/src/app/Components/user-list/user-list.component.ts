@@ -21,9 +21,12 @@ import { ChatService } from '../../Services/chat.service';
       <span>
         {{ user.address | titlecase }}
       </span>
+      @if(user.lat && user.lon){
       <button mat-icon-button (click)="onSearch(user.lat, user.lon)">
         <mat-icon>search</mat-icon>
       </button>
+      }
+
       <button mat-icon-button (click)="openChat(user.id, user.username)">
         <mat-icon>chat</mat-icon>
       </button>
@@ -70,7 +73,7 @@ export class UserListComponent implements OnInit {
   }
   openChat(id: number, username: string) {
     this.dialogRef.close();
-    this.chatService.setReceiver(id,username);
+    this.chatService.setPartner(id, username);
 
     this.router.navigate(['/chat']);
   }

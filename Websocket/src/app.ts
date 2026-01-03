@@ -29,8 +29,6 @@ const server = http.createServer(app);
 const wssChat = new WebSocketServer({ server, path: "/messages" });
 configWsChat(wssChat);
 
-//const wssNewMessages = new WebSocketServer({ server, path: "/newMessages" });
-//configWsNewMessages(wssNewMessages);
 
 //Run endpoints
 server.listen(port, () => {

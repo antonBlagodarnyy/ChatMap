@@ -1,12 +1,26 @@
 .container {
-  margin-top: 10vh;
-  margin-left: 50%;
-  width: 40%;
+  display: flex;
+  justify-content: center;
+  margin: 3rem 2rem 0 2rem;
+
+}
+mat-form-field {
+  width: 60vw;
+  margin: 1rem;
+}
+button {
+  width: 7rem;
+  margin-right: 2rem;
 }
 form {
   display: flex;
   flex-direction: column;
+  align-content: center;
+  justify-content: center;
+  margin-bottom: 2rem;
 }
-input {
-  margin: 2vh;
+a {
+  margin-top: 2rem;
+  margin-left:  80%;
+
 }

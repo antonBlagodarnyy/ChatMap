@@ -2,6 +2,7 @@ package com.ChatMap.Api.Services;
 
 import com.ChatMap.Api.Dto.UserThumbnailDTO;
 import com.ChatMap.Api.Dto.UsersThumbnailsResponse;
+import com.ChatMap.Api.Entities.Location;
 import com.ChatMap.Api.Entities.User;
 import com.ChatMap.Api.Models.CustomUserDetails;
 import com.ChatMap.Api.Repositories.UserRepository;
@@ -37,12 +38,13 @@ public class UserService {
     }
 
     private UserThumbnailDTO userToThumbnail(User user) {
+
         return new UserThumbnailDTO(
                 user.getId(),
                 user.getUsername(),
-                user.getLocation().getAddress(),
-                user.getLocation().getLatitude(),
-                user.getLocation().getLongitude()
+                user.getLocation() != null ? user.getLocation().getAddress() : "Unknown",
+                user.getLocation() != null ? user.getLocation().getLatitude() : null,
+                user.getLocation() != null ? user.getLocation().getLongitude() : null
         );
     }
 }

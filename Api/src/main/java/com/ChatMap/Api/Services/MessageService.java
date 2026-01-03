@@ -12,7 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 @Service
 public class MessageService {
@@ -22,7 +22,7 @@ public class MessageService {
     @Autowired
     private UserRepository userRepository;
 
-    public SaveMessageResponse saveMessage(SaveMessageRequest saveMessageRequest) {
+    public SavedMessageDTO saveMessage(SaveMessageRequest saveMessageRequest) {
         CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
                 .getContext()
                 .getAuthentication()
@@ -35,7 +35,7 @@ public class MessageService {
                 .orElseThrow(() -> new RuntimeException("Receiver not found"));
 
         if (sender.getId().equals(receiver.getId())) {
-            throw new IllegalArgumentException("Sender and receiver cannot be the same");
+            throw new IllegalArgumentException("Sender and receiverId cannot be the same");
         }
 
         Message message = new Message();
@@ -44,14 +44,27 @@ public class MessageService {
         message.setText(saveMessageRequest.text());
         Message savedMsg = messageRepository.save(message);
 
-        return new SaveMessageResponse(
-                savedMsg.getSender().getUsername(),
-                savedMsg.getReceiver().getId(),
-                savedMsg.getText(),
-                savedMsg.getTs());
+        return new SavedMessageDTO(
+                new MessageDTO(
+                        savedMsg.getSender().getUsername(),
+                        savedMsg.getSender().getId(),
+                        savedMsg.getReceiver().getUsername(),
+                        savedMsg.getReceiver().getId(),
+                        savedMsg.getText(),
+                        savedMsg.getTs(),
+                        savedMsg.isRead()));
     }
 
+
+    /*TODO isRead is sent. Should now:
+    1. Be received check
+    2. Show badge check
+    3. Update status once they are read check
+    4. Implement ws
+    5. Implement same in chatHistory
+    */
     public RetrieveMessagesResponse retrieveMessages(Integer receiver) {
+
         CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
                 .getContext()
                 .getAuthentication()
@@ -63,15 +76,8 @@ public class MessageService {
 
         return new RetrieveMessagesResponse(
                 messageRepository.findMessagesBetweenTwoUsers(
-                                currentUser.getId(),
-                                receiver)
-                        .stream()
-                        .map(m -> new MessageDTO(
-                                m.getSender().getUsername(),
-                                m.getReceiver().getId(),
-                                m.getText(),
-                                m.getTs()))
-                        .toList());
+                        currentUser.getId(),
+                        receiver));
 
     }
 
@@ -81,25 +87,16 @@ public class MessageService {
                 .getAuthentication()
                 .getPrincipal();
 
-        User currentUser = userRepository.findById(userDetails.getId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        List<Message> messages = messageRepository.findConversartions(userDetails.getId());
-
-        return messages.stream()
-                .map(m -> {
-                    User partner = m.getSender().equals(currentUser)
-                            ? m.getReceiver()
-                            : m.getSender();
-                    return new ChatPreviewResponse(
-                            partner.getUsername(),
-                            partner.getId(),
-                            new MessageDTO(
-                                    m.getSender().getUsername(),
-                                    m.getReceiver().getId(),
-                                    m.getText(),
-                                    m.getTs()));
-                })
-                .collect(Collectors.toList());
+        return messageRepository.findConversationsWithUnreadCount(userDetails.getId());
     }
+
+    public void markMessagesAsRead(Integer partnerId) {
+        System.out.println(partnerId);
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+        messageRepository.markAsRead(userDetails.getId(), partnerId);
+    }
+
 }

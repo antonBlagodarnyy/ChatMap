@@ -26,9 +26,9 @@ export class AuthService {
     const authData = { email: email, password: password };
     return this.http
       .post<{
-        jwt: string ,
-       username: string ;
-      }>(environment.apiUrl + 'auth/login', authData, )
+        jwt: string;
+        username: string;
+      }>(environment.apiUrl + 'auth/login', authData)
       .pipe(
         tap((r) => {
           this.processUserData(r.jwt, r.username);
@@ -64,20 +64,23 @@ export class AuthService {
     if (authData.exp && authData.sub) {
       const expires = authData.exp * 1000;
       const userName = username;
+      const id = +authData.sub;
 
       const expirationDate = new Date(expires);
       this.setAuthTimer(expirationDate);
       this.userSub$.next({
+        id: id,
         token: token,
         expirationDate: expirationDate,
         username: userName,
       });
 
-      this.saveAuthData(token, expirationDate, userName);
+      this.saveAuthData(id, token, expirationDate, userName);
     }
   }
 
   private clearAuthData() {
+    localStorage.removeItem('id');
     localStorage.removeItem('token');
     localStorage.removeItem('expiration');
     localStorage.removeItem('username');
@@ -87,18 +90,25 @@ export class AuthService {
       this.clearUser();
     }, expires.getTime() - new Date().getTime());
   }
-  private saveAuthData(token: string, expirationDate: Date, username: string) {
+  private saveAuthData(
+    id: number,
+    token: string,
+    expirationDate: Date,
+    username: string
+  ) {
+    localStorage.setItem('id', id.toString());
     localStorage.setItem('token', token);
     localStorage.setItem('expiration', expirationDate.toISOString());
     localStorage.setItem('username', username);
   }
 
   private getAuthData(): UserAuth | null {
+    const id = localStorage.getItem('id');
     const token = localStorage.getItem('token');
     const expirationDateRaw = localStorage.getItem('expiration');
     const username = localStorage.getItem('username');
 
-    if (!token || !expirationDateRaw || !username) {
+    if (!token || !expirationDateRaw || !username || !id) {
       return null;
     }
     const expirationDate = new Date(expirationDateRaw);
@@ -106,6 +116,7 @@ export class AuthService {
     this.setAuthTimer(expirationDate);
 
     return {
+      id: +id,
       token,
       expirationDate,
       username,

@@ -11,7 +11,7 @@ public class WebClientConfig {
     @Bean
     public WebClient webClient() {
         return WebClient.builder()
-                .defaultHeader(HttpHeaders.USER_AGENT, "MyApp/1.0")
+                .defaultHeader(HttpHeaders.USER_AGENT, "ChatMapApi/1.0 (antonbgi98@gmail.com)")
                 .build();
     }
 }

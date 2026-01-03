@@ -1,9 +1,8 @@
-import { BaseMessage} from "./Mesage";
+import { BaseMessage } from './Mesage';
+import { MessageInfo } from './MessageInfo';
 
-export interface SavedMessage extends BaseMessage{
+export interface SavedMessage extends BaseMessage {
   type: 'SAVED';
-  sender: string;
-  receiver:number;
-  text: string;
-  ts:string;
+  message: MessageInfo;
+  
 }
