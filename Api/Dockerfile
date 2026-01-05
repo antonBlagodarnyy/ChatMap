@@ -5,10 +5,9 @@ WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
-RUN --mount=type=secret,id=_env,dst=/etc/secrets/.env \
-    export $(grep -v '^#' /etc/secrets/.env | xargs) && \
-    echo "Building app with DB $DB_URL and API_KEY $API_KEY" && \
-    mvn clean package
+RUN mvn clean test
+
+RUN mvn clean package
 
 # Package stage
 FROM eclipse-temurin:21-jdk-alpine
@@ -16,10 +15,8 @@ FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
 
 # Copy the **Spring Boot repackaged JAR** explicitly
-COPY --from=build /app/target/Auth-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /app/target/Api-1.1.0-SNAPSHOT.jar app.jar
 
-# Optional: verify
-RUN ls -l /app
 
 ENTRYPOINT ["java","-jar","app.jar"]
 EXPOSE 8080

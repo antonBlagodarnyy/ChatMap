@@ -21,7 +21,7 @@ app.use(
     credentials: true,
   })
 );
-
+console.log(process.env.CLIENT_URL)
 
 //Ws config
 const server = http.createServer(app);

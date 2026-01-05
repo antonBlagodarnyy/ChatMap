@@ -1,0 +1,24 @@
+services:
+  api:
+    build: ./Api/
+    container_name: api
+    env_file: ./Api/.env
+    networks:
+      - my_network
+    ports:
+      - $API_CONTAINER_PORT:$API_HOST_PORT
+
+  ws:
+    build: ./Websocket/
+    container_name: ws
+    env_file: ./Websocket/.env
+    depends_on:
+      - api
+    networks:
+      - my_network
+    ports:
+      - $WS_CONTAINER_PORT:$WS_HOST_PORT
+
+networks:
+  my_network:
+    external: true
