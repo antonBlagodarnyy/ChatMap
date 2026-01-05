@@ -6,7 +6,7 @@ services:
     networks:
       - my_network
     ports:
-      - $API_CONTAINER_PORT:$API_HOST_PORT
+      - $API_HOST_PORT:$API_CONTAINER_PORT
 
   ws:
     build: ./Websocket/
@@ -17,7 +17,7 @@ services:
     networks:
       - my_network
     ports:
-      - $WS_CONTAINER_PORT:$WS_HOST_PORT
+      - $WS_HOST_PORT:$WS_CONTAINER_PORT
 
 networks:
   my_network:
